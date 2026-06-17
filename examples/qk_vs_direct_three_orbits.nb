@@ -1,0 +1,914 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 14.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     36752,        905]
+NotebookOptionsPosition[     32771,        850]
+NotebookOutlinePosition[     33185,        867]
+CellTagsIndexPosition[     33142,        864]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell["QK vs Direct EOM", "Title",ExpressionUUID->"d502abf3-4302-034a-9b10-c4bb94a838dd"],
+
+Cell["\<\
+Run Setup once. Edit the Global Inputs cell and the input cell at the start \
+of each orbit section. Each section first returns the completed initial data, \
+initial scales, conserved labels, and QK parameters, then computes QK and \
+direct EOM trajectories with t, r, phi, rdot, phidot. Units are G=c=M=1, so \
+plot axes use t/M, r/M, and M phidot. In all plots the red curve labelled 0PN \
+QK is the Newtonian QK trajectory generated from the same initial data. In \
+overlay plots the direct-EOM curve is drawn first and the black dashed QK \
+curve is drawn second.\
+\>", "Text",ExpressionUUID->"b6412b70-dc0d-7548-94b4-574336907fa2"],
+
+Cell[CellGroupData[{
+
+Cell["Setup", "Section",ExpressionUUID->"6c005209-ed17-d045-8546-a96992e5c5f5"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}], ";", 
+  RowBox[{"root", "=", 
+   RowBox[{"ParentDirectory", "[", 
+    RowBox[{"NotebookDirectory", "[", "]"}], "]"}]}], ";", 
+  RowBox[{"Get", "[", 
+   RowBox[{"FileNameJoin", "[", 
+    RowBox[{"{", 
+     RowBox[{"root", ",", "\"\<src\>\"", ",", "\"\<QKOrbits.wl\>\""}], "}"}], 
+    "]"}], "]"}], ";", 
+  RowBox[{"Get", "[", 
+   RowBox[{"FileNameJoin", "[", 
+    RowBox[{"{", 
+     RowBox[{"root", ",", "\"\<src\>\"", ",", "\"\<DirectEOMOrbits.wl\>\""}], 
+     "}"}], "]"}], "]"}], ";", 
+  RowBox[{"eom", "=", 
+   RowBox[{"DirectEOMOrbits`DirectEOMLoad", "[", 
+    RowBox[{"\"\<RootDirectory\>\"", "\[Rule]", "root"}], "]"}]}], ";", 
+  RowBox[{"ClearAll", "[", 
+   RowBox[{
+   "makeTimes", ",", "cleanInitialData", ",", "computeQKInfo", ",", 
+    "computeQKPN", ",", "computeQK", ",", "computeDirect", ",", "orbitRows", 
+    ",", "realValues", ",", "shortValue", ",", "shortAssoc", ",", 
+    "publicQKParameterKeys", ",", "qkInfoDisplay", ",", "styleFor", ",", 
+    "seriesPanel", ",", "plotOrbit", ",", "exportOrbit"}], "]"}], ";", 
+  RowBox[{
+   RowBox[{"makeTimes", "[", 
+    RowBox[{"tStart_", ",", "tEnd_", ",", "samples_"}], "]"}], ":=", 
+   RowBox[{"N", "[", 
+    RowBox[{
+     RowBox[{"Subdivide", "[", 
+      RowBox[{"tStart", ",", "tEnd", ",", "samples"}], "]"}], ",", "wp"}], 
+    "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"cleanInitialData", "[", "data_Association", "]"}], ":=", 
+   RowBox[{"AssociationMap", "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"N", "[", 
+       RowBox[{"#1", ",", "wp"}], "]"}], "&"}], ",", "data"}], "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"computeQKInfo", "[", 
+    RowBox[{"modelName_String", ",", "initialData_Association"}], "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", "model", "}"}], ",", 
+     RowBox[{
+      RowBox[{"model", "=", 
+       RowBox[{"QKOrbits`QKLoadModel", "[", 
+        RowBox[{"modelName", ",", 
+         RowBox[{"\"\<RootDirectory\>\"", "\[Rule]", "root"}]}], "]"}]}], ";", 
+      RowBox[{"QKOrbits`QKParameterValuesFromInitialData", "[", 
+       RowBox[{"model", ",", "primitiveParams", ",", "initialData", ",", 
+        RowBox[{"WorkingPrecision", "\[Rule]", "wp"}], ",", 
+        RowBox[{"\"\<PNOrder\>\"", "\[Rule]", "pnOrder"}], ",", 
+        RowBox[{"\"\<RootDirectory\>\"", "\[Rule]", "root"}], ",", 
+        RowBox[{
+        "\"\<ParabolicVelocitySign\>\"", "\[Rule]", 
+         "parabolicVelocitySign"}]}], "]"}]}]}], "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"computeQKPN", "[", 
+    RowBox[{
+    "modelName_String", ",", "initialData_Association", ",", "times_List", 
+     ",", "order_"}], "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", "model", "}"}], ",", 
+     RowBox[{
+      RowBox[{"model", "=", 
+       RowBox[{"QKOrbits`QKLoadModel", "[", 
+        RowBox[{"modelName", ",", 
+         RowBox[{"\"\<RootDirectory\>\"", "\[Rule]", "root"}]}], "]"}]}], ";", 
+      RowBox[{"QKOrbits`QKOrbitFromInitialData", "[", 
+       RowBox[{
+       "model", ",", "primitiveParams", ",", "initialData", ",", "times", ",", 
+        RowBox[{"WorkingPrecision", "\[Rule]", "wp"}], ",", 
+        RowBox[{"AccuracyGoal", "\[Rule]", "accGoal"}], ",", 
+        RowBox[{"PrecisionGoal", "\[Rule]", "precGoal"}], ",", 
+        RowBox[{"\"\<PNOrder\>\"", "\[Rule]", "order"}], ",", 
+        RowBox[{"\"\<RootDirectory\>\"", "\[Rule]", "root"}], ",", 
+        RowBox[{
+        "\"\<ParabolicVelocitySign\>\"", "\[Rule]", 
+         "parabolicVelocitySign"}]}], "]"}]}]}], "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"computeQK", "[", 
+    RowBox[{
+    "modelName_String", ",", "initialData_Association", ",", "times_List"}], 
+    "]"}], ":=", 
+   RowBox[{"computeQKPN", "[", 
+    RowBox[{"modelName", ",", "initialData", ",", "times", ",", "pnOrder"}], 
+    "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"computeDirect", "[", 
+    RowBox[{"initialData_Association", ",", "times_List"}], "]"}], ":=", 
+   RowBox[{"DirectEOMOrbits`DirectEOMOrbit", "[", 
+    RowBox[{
+    "eom", ",", "primitiveParams", ",", "initialData", ",", "times", ",", 
+     RowBox[{"WorkingPrecision", "\[Rule]", "directWP"}], ",", 
+     RowBox[{"AccuracyGoal", "\[Rule]", "directAccGoal"}], ",", 
+     RowBox[{"PrecisionGoal", "\[Rule]", "directPrecGoal"}], ",", 
+     RowBox[{"\"\<PNOrder\>\"", "\[Rule]", "pnOrder"}], ",", 
+     RowBox[{"MaxStepSize", "\[Rule]", "directMaxStepSize"}], ",", 
+     RowBox[{
+     "\"\<Include2p5PNRadiationReaction\>\"", "\[Rule]", "includeRR25"}]}], 
+    "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"orbitRows", "[", "orbit_Association", "]"}], ":=", 
+   RowBox[{"Prepend", "[", 
+    RowBox[{
+     RowBox[{"Transpose", "[", 
+      RowBox[{"orbit", "/@", 
+       RowBox[{"{", 
+        RowBox[{
+        "\"\<t\>\"", ",", "\"\<r\>\"", ",", "\"\<phi\>\"", ",", 
+         "\"\<rdot\>\"", ",", "\"\<phidot\>\""}], "}"}]}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+      "\"\<t\>\"", ",", "\"\<r\>\"", ",", "\"\<phi\>\"", ",", "\"\<rdot\>\"", 
+       ",", "\"\<phidot\>\""}], "}"}]}], "]"}]}], ";", 
+  RowBox[{"directStyle", "=", 
+   RowBox[{"Directive", "[", 
+    RowBox[{
+     TemplateBox[<|"color" -> RGBColor[0.08, 0.32, 0.78]|>,
+      "RGBColorSwatchTemplate"], ",", 
+     RowBox[{"AbsoluteThickness", "[", "2.4`", "]"}]}], "]"}]}], ";", 
+  RowBox[{"qkStyle", "=", 
+   RowBox[{"Directive", "[", 
+    RowBox[{"Black", ",", "Dashed", ",", 
+     RowBox[{"AbsoluteThickness", "[", "2.8`", "]"}]}], "]"}]}], ";", 
+  RowBox[{"qk0Style", "=", 
+   RowBox[{"Directive", "[", 
+    RowBox[{
+     TemplateBox[<|"color" -> RGBColor[0.85, 0.05, 0.05]|>,
+      "RGBColorSwatchTemplate"], ",", 
+     RowBox[{"AbsoluteThickness", "[", "2.1`", "]"}]}], "]"}]}], ";", 
+  RowBox[{"otherStyle", "=", 
+   RowBox[{"Directive", "[", 
+    RowBox[{
+     TemplateBox[<|"color" -> RGBColor[0.7, 0.12, 0.12]|>,
+      "RGBColorSwatchTemplate"], ",", "DotDashed", ",", 
+     RowBox[{"AbsoluteThickness", "[", "2.2`", "]"}]}], "]"}]}], ";", 
+  RowBox[{"fields", "=", 
+   RowBox[{"{", 
+    RowBox[{
+    "\"\<r\>\"", ",", "\"\<phi\>\"", ",", "\"\<rdot\>\"", ",", 
+     "\"\<phidot\>\""}], "}"}]}], ";", 
+  RowBox[{"fieldLabels", "=", 
+   RowBox[{"Association", "[", 
+    RowBox[{
+     RowBox[{"\"\<r\>\"", "\[Rule]", "\"\<r / M\>\""}], ",", 
+     RowBox[{"\"\<phi\>\"", "\[Rule]", "\"\<\[Phi]\>\""}], ",", 
+     RowBox[{
+     "\"\<rdot\>\"", "\[Rule]", 
+      "\"\<\\!\\(\\*OverscriptBox[\\(r\\), \\(.\\)]\\)\>\""}], ",", 
+     RowBox[{
+     "\"\<phidot\>\"", "\[Rule]", 
+      "\"\<M \\!\\(\\*OverscriptBox[\\(\[Phi]\\), \\(.\\)]\\)\>\""}]}], 
+    "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"directLabel", "[", "]"}], ":=", 
+   RowBox[{"If", "[", 
+    RowBox[{
+    "includeRR25", ",", "\"\<direct EOM + 2.5PN RR\>\"", ",", 
+     "\"\<direct EOM\>\""}], "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"shortValue", "[", "x_", "]"}], ":=", 
+   RowBox[{"If", "[", 
+    RowBox[{
+     RowBox[{"NumberQ", "[", 
+      RowBox[{"N", "[", "x", "]"}], "]"}], ",", 
+     RowBox[{"N", "[", 
+      RowBox[{"x", ",", "16"}], "]"}], ",", "x"}], "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"shortAssoc", "[", "a_Association", "]"}], ":=", 
+   RowBox[{"AssociationMap", "[", 
+    RowBox[{"shortValue", ",", "a"}], "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"publicQKParameterKeys", "[", 
+    RowBox[{"modelName_String", ",", "qkParams_Association"}], "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", "keys", "}"}], ",", 
+     RowBox[{
+      RowBox[{"keys", "=", 
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{"StringContainsQ", "[", 
+          RowBox[{"modelName", ",", "\"\<Parabolic\>\""}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"\"\<sP\>\"", ",", "\"\<rP\>\""}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "\"\<n\>\"", ",", "\"\<K\>\"", ",", "\"\<ar\>\"", ",", "\"\<er\>\"",
+            ",", "\"\<et\>\"", ",", "\"\<ePhi\>\"", ",", "\"\<fPhi\>\"", ",", 
+           "\"\<gPhi\>\"", ",", "\"\<hPhi\>\"", ",", "\"\<iPhi\>\"", ",", 
+           "\"\<gt\>\"", ",", "\"\<ft\>\"", ",", "\"\<ht\>\"", ",", 
+           "\"\<it\>\""}], "}"}]}], "]"}]}], ";", 
+      RowBox[{"Select", "[", 
+       RowBox[{"keys", ",", 
+        RowBox[{
+         RowBox[{"KeyExistsQ", "[", 
+          RowBox[{"qkParams", ",", "#1"}], "]"}], "&"}]}], "]"}]}]}], "]"}]}],
+   ";", 
+  RowBox[{
+   RowBox[{"qkInfoDisplay", "[", 
+    RowBox[{"modelName_String", ",", "info_Association"}], "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"params", "=", 
+        RowBox[{"info", "[", "\"\<QKParameters\>\"", "]"}]}], ",", "keys"}], 
+      "}"}], ",", 
+     RowBox[{
+      RowBox[{"keys", "=", 
+       RowBox[{"publicQKParameterKeys", "[", 
+        RowBox[{"modelName", ",", "params"}], "]"}]}], ";", 
+      RowBox[{"Association", "[", 
+       RowBox[{
+        RowBox[{"\"\<InitialData\>\"", "\[Rule]", 
+         RowBox[{"shortAssoc", "[", 
+          RowBox[{"info", "[", "\"\<InitialData\>\"", "]"}], "]"}]}], ",", 
+        RowBox[{"\"\<InitialScales\>\"", "\[Rule]", 
+         RowBox[{"shortAssoc", "[", 
+          RowBox[{"info", "[", "\"\<InitialScales\>\"", "]"}], "]"}]}], ",", 
+        RowBox[{"\"\<ConservedLabels\>\"", "\[Rule]", 
+         RowBox[{"shortAssoc", "[", 
+          RowBox[{"info", "[", "\"\<ConservedLabels\>\"", "]"}], "]"}]}], ",", 
+        RowBox[{"\"\<QKParameters\>\"", "\[Rule]", 
+         RowBox[{"shortAssoc", "[", 
+          RowBox[{"KeyTake", "[", 
+           RowBox[{"params", ",", "keys"}], "]"}], "]"}]}]}], "]"}]}]}], 
+    "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"styleFor", "[", "label_", "]"}], ":=", 
+   RowBox[{"Which", "[", 
+    RowBox[{
+     RowBox[{"label", "===", "\"\<0PN QK\>\""}], ",", "qk0Style", ",", 
+     RowBox[{"label", "===", "\"\<QK\>\""}], ",", "qkStyle", ",", 
+     RowBox[{"StringContainsQ", "[", 
+      RowBox[{"label", ",", "\"\<direct\>\""}], "]"}], ",", "directStyle", 
+     ",", "True", ",", "otherStyle"}], "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"realValues", "[", "x_", "]"}], ":=", 
+   RowBox[{"Chop", "[", 
+    RowBox[{"Re", "[", 
+     RowBox[{"N", "[", "x", "]"}], "]"}], "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"seriesPanel", "[", 
+    RowBox[{"title_String", ",", "orbits_Association", ",", "field_String"}], 
+    "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"names", ",", "t", ",", "vals", ",", "curves", ",", "yGrid"}], 
+      "}"}], ",", 
+     RowBox[{
+      RowBox[{"names", "=", 
+       RowBox[{"Keys", "[", "orbits", "]"}]}], ";", 
+      RowBox[{"t", "=", 
+       RowBox[{"realValues", "[", 
+        RowBox[{
+         RowBox[{"First", "[", 
+          RowBox[{"Values", "[", "orbits", "]"}], "]"}], "[", "\"\<t\>\"", 
+         "]"}], "]"}]}], ";", 
+      RowBox[{"vals", "=", 
+       RowBox[{"Join", "@@", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"realValues", "[", 
+            RowBox[{"#1", "[", "field", "]"}], "]"}], "&"}], ")"}], "/@", 
+         RowBox[{"Values", "[", "orbits", "]"}]}]}]}], ";", 
+      RowBox[{"curves", "=", 
+       RowBox[{
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"Transpose", "[", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"realValues", "[", 
+              RowBox[{"#1", "[", "\"\<t\>\"", "]"}], "]"}], ",", 
+             RowBox[{"realValues", "[", 
+              RowBox[{"#1", "[", "field", "]"}], "]"}]}], "}"}], "]"}], "&"}],
+          ")"}], "/@", 
+        RowBox[{"Values", "[", "orbits", "]"}]}]}], ";", 
+      RowBox[{"yGrid", "=", 
+       RowBox[{"Subdivide", "[", 
+        RowBox[{
+         RowBox[{"Min", "[", "vals", "]"}], ",", 
+         RowBox[{"Max", "[", "vals", "]"}], ",", "4"}], "]"}]}], ";", 
+      RowBox[{"ListLinePlot", "[", 
+       RowBox[{"curves", ",", 
+        RowBox[{"PlotStyle", "\[Rule]", 
+         RowBox[{"styleFor", "/@", "names"}]}], ",", 
+        RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+        RowBox[{"FrameTicks", "\[Rule]", "Automatic"}], ",", 
+        RowBox[{"FrameLabel", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{"\"\<t / M\>\"", ",", 
+           RowBox[{"fieldLabels", "[", "field", "]"}]}], "}"}]}], ",", 
+        RowBox[{"PlotLabel", "\[Rule]", 
+         RowBox[{"Style", "[", 
+          RowBox[{
+           RowBox[{"title", "<>", "\"\<  \>\"", "<>", 
+            RowBox[{"fieldLabels", "[", "field", "]"}]}], ",", "15", ",", 
+           "Bold", ",", "Black"}], "]"}]}], ",", 
+        RowBox[{"GridLines", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"Subdivide", "[", 
+            RowBox[{
+             RowBox[{"Min", "[", "t", "]"}], ",", 
+             RowBox[{"Max", "[", "t", "]"}], ",", "4"}], "]"}], ",", 
+           "yGrid"}], "}"}]}], ",", 
+        RowBox[{"GridLinesStyle", "\[Rule]", 
+         RowBox[{"Directive", "[", 
+          RowBox[{
+           TemplateBox[<|"color" -> GrayLevel[0.85]|>,
+            "GrayLevelColorSwatchTemplate"], ",", 
+           RowBox[{"AbsoluteThickness", "[", "0.6`", "]"}]}], "]"}]}], ",", 
+        RowBox[{"AspectRatio", "\[Rule]", "0.62`"}], ",", 
+        RowBox[{"ImageSize", "\[Rule]", "360"}], ",", 
+        RowBox[{"ImagePadding", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{"86", ",", "24"}], "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"58", ",", "30"}], "}"}]}], "}"}]}], ",", 
+        RowBox[{"BaseStyle", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"FontFamily", "\[Rule]", "\"\<Arial\>\""}], ",", 
+           RowBox[{"FontSize", "\[Rule]", "12"}], ",", "Black"}], "}"}]}], 
+        ",", 
+        RowBox[{"LabelStyle", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{"Black", ",", "13"}], "}"}]}], ",", 
+        RowBox[{"FrameTicksStyle", "\[Rule]", 
+         RowBox[{"Directive", "[", 
+          RowBox[{"Black", ",", "11"}], "]"}]}], ",", 
+        RowBox[{"PlotRange", "\[Rule]", "All"}], ",", 
+        RowBox[{"PlotRangePadding", "\[Rule]", 
+         RowBox[{"Scaled", "[", "0.05`", "]"}]}]}], "]"}]}]}], "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"plotOrbit", "[", 
+    RowBox[{"title_String", ",", "orbits_Association"}], "]"}], ":=", 
+   RowBox[{"Legended", "[", 
+    RowBox[{
+     RowBox[{"GraphicsGrid", "[", 
+      RowBox[{
+       RowBox[{"Partition", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"seriesPanel", "[", 
+             RowBox[{"title", ",", "orbits", ",", "#1"}], "]"}], "&"}], ")"}],
+           "/@", "fields"}], ",", "2"}], "]"}], ",", 
+       RowBox[{"Spacings", "\[Rule]", 
+        RowBox[{"{", 
+         RowBox[{"0.2`", ",", "0.25`"}], "}"}]}]}], "]"}], ",", 
+     RowBox[{"Placed", "[", 
+      RowBox[{
+       RowBox[{"LineLegend", "[", 
+        RowBox[{
+         RowBox[{"styleFor", "/@", 
+          RowBox[{"Keys", "[", "orbits", "]"}]}], ",", 
+         RowBox[{"Keys", "[", "orbits", "]"}], ",", 
+         RowBox[{"LegendLayout", "\[Rule]", "\"\<Row\>\""}], ",", 
+         RowBox[{"LabelStyle", "\[Rule]", 
+          RowBox[{"{", 
+           RowBox[{"Black", ",", "14"}], "}"}]}], ",", 
+         RowBox[{"LegendMarkerSize", "\[Rule]", "34"}]}], "]"}], ",", 
+       "Below"}], "]"}]}], "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"exportOrbit", "[", 
+    RowBox[{
+    "name_String", ",", "qkInfo_Association", ",", "qk_Association", ",", 
+     "direct_Association", ",", "qkFig_", ",", "directFig_", ",", 
+     "overlayFig_"}], "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"dir", "=", "outDir"}], "}"}], ",", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"!", 
+         RowBox[{"DirectoryQ", "[", "dir", "]"}]}], ",", 
+        RowBox[{"CreateDirectory", "[", 
+         RowBox[{"dir", ",", 
+          RowBox[{"CreateIntermediateDirectories", "\[Rule]", "True"}]}], 
+         "]"}]}], "]"}], ";", 
+      RowBox[{"Export", "[", 
+       RowBox[{
+        RowBox[{"FileNameJoin", "[", 
+         RowBox[{"{", 
+          RowBox[{"dir", ",", 
+           RowBox[{"name", "<>", "\"\<_qk.png\>\""}]}], "}"}], "]"}], ",", 
+        "qkFig", ",", 
+        RowBox[{"ImageResolution", "\[Rule]", "170"}]}], "]"}], ";", 
+      RowBox[{"Export", "[", 
+       RowBox[{
+        RowBox[{"FileNameJoin", "[", 
+         RowBox[{"{", 
+          RowBox[{"dir", ",", 
+           RowBox[{"name", "<>", "\"\<_direct.png\>\""}]}], "}"}], "]"}], ",",
+         "directFig", ",", 
+        RowBox[{"ImageResolution", "\[Rule]", "170"}]}], "]"}], ";", 
+      RowBox[{"Export", "[", 
+       RowBox[{
+        RowBox[{"FileNameJoin", "[", 
+         RowBox[{"{", 
+          RowBox[{"dir", ",", 
+           RowBox[{"name", "<>", "\"\<_overlay.png\>\""}]}], "}"}], "]"}], 
+        ",", "overlayFig", ",", 
+        RowBox[{"ImageResolution", "\[Rule]", "170"}]}], "]"}], ";", 
+      RowBox[{"Export", "[", 
+       RowBox[{
+        RowBox[{"FileNameJoin", "[", 
+         RowBox[{"{", 
+          RowBox[{"dir", ",", 
+           RowBox[{"name", "<>", "\"\<_qk.tsv\>\""}]}], "}"}], "]"}], ",", 
+        RowBox[{"orbitRows", "[", "qk", "]"}], ",", "\"\<TSV\>\""}], "]"}], 
+      ";", 
+      RowBox[{"Export", "[", 
+       RowBox[{
+        RowBox[{"FileNameJoin", "[", 
+         RowBox[{"{", 
+          RowBox[{"dir", ",", 
+           RowBox[{"name", "<>", "\"\<_direct.tsv\>\""}]}], "}"}], "]"}], ",", 
+        RowBox[{"orbitRows", "[", "direct", "]"}], ",", "\"\<TSV\>\""}], 
+       "]"}], ";", 
+      RowBox[{"qkInfo", ">>", 
+       InterpretationBox[
+        RowBox[{"FileNameJoin", "[", 
+         RowBox[{"{", 
+          RowBox[{"dir", ",", 
+           RowBox[{"name", "<>", "\"\<_qk_parameters.wl\>\""}]}], "}"}], "]"}],
+        FileNameJoin[{$CellContext`dir, $CellContext`name <> 
+          "_qk_parameters.wl"}],
+        Editable->False]}], ";", "dir"}]}], "]"}]}], ";"}]], "Input",Expressio\
+nUUID->"a56b2d00-f9ef-574b-bc71-a8da48a456d1"]
+}, Closed]],
+
+Cell["Global Inputs", "Section",ExpressionUUID->"09dd31ff-1a5a-be43-97d3-cb31409ac08e"],
+
+Cell["\<\
+PNOrder must be one of allowedPNOrders. Use eps -> 1 for physical orbits; \
+smaller eps values are bookkeeping diagnostics only and are not the PN \
+truncation switch. includeRR25 affects only the direct EOM trajectory. \
+parabolicVelocitySign chooses the sign of the missing parabolic velocity. \
+directWP, directAccGoal, directPrecGoal, and directMaxStepSize control only \
+the direct EOM solver.\
+\>", "Text",ExpressionUUID->"f201103f-db9b-5c4f-b58f-c56b5c6efeeb"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"allowedPNOrders", "=", 
+   RowBox[{"QKOrbits`QKAllowedPNOrders", "[", "]"}]}], ";", 
+  RowBox[{"pnOrder", "=", "3"}], ";", 
+  RowBox[{"includeRR25", "=", "False"}], ";", 
+  RowBox[{"parabolicVelocitySign", "=", "1"}], ";", 
+  RowBox[{"wp", "=", "MachinePrecision"}], ";", 
+  RowBox[{"accGoal", "=", "Automatic"}], ";", 
+  RowBox[{"precGoal", "=", "Automatic"}], ";", 
+  RowBox[{"directWP", "=", "40"}], ";", 
+  RowBox[{"directAccGoal", "=", "20"}], ";", 
+  RowBox[{"directPrecGoal", "=", "20"}], ";", 
+  RowBox[{"directMaxStepSize", "=", "500"}], ";", 
+  RowBox[{"primitiveParams", "=", 
+   RowBox[{"Association", "[", 
+    RowBox[{
+     RowBox[{"\"\<eps\>\"", "\[Rule]", "1"}], ",", 
+     RowBox[{"\"\<nu\>\"", "\[Rule]", 
+      FractionBox["21", "100"]}], ",", 
+     RowBox[{"\"\<delta\>\"", "\[Rule]", 
+      FractionBox["2", "5"]}], ",", 
+     RowBox[{"\"\<chi1\>\"", "\[Rule]", "1"}], ",", 
+     RowBox[{"\"\<chi2\>\"", "\[Rule]", "1"}], ",", 
+     RowBox[{"\"\<kap1\>\"", "\[Rule]", "1"}], ",", 
+     RowBox[{"\"\<kap2\>\"", "\[Rule]", "1"}]}], "]"}]}], ";", 
+  "allowedPNOrders"}]], "Input",ExpressionUUID->"b9f32630-c2a3-cf46-a76a-\
+cc6988d6f3dc"],
+
+Cell["Unbound", "Section",ExpressionUUID->"3679bae6-78ee-fd40-a530-0dbcc3de7156"],
+
+Cell["\<\
+Change r, phi, rdot, phidot, tStart, tEnd, and samples here. The time and \
+radius inputs are dimensionless t/M and r/M.\
+\>", "Text",ExpressionUUID->"335fef4f-f7b8-b540-a74c-92876ae5f00d"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"unboundInitialData", "=", 
+   RowBox[{"cleanInitialData", "[", 
+    RowBox[{"Association", "[", 
+     RowBox[{
+      RowBox[{"\"\<r\>\"", "\[Rule]", "20"}], ",", 
+      RowBox[{"\"\<phi\>\"", "\[Rule]", 
+       FractionBox["1", "5"]}], ",", 
+      RowBox[{"\"\<rdot\>\"", "\[Rule]", "0.18`"}], ",", 
+      RowBox[{"\"\<phidot\>\"", "\[Rule]", "0.02`"}]}], "]"}], "]"}]}], ";", 
+  RowBox[{"unboundTimes", "=", 
+   RowBox[{"makeTimes", "[", 
+    RowBox[{"0", ",", "70", ",", "200"}], "]"}]}], ";"}]], "Input",ExpressionU\
+UID->"6292d961-4bc8-1c4b-8fa7-c94cafd4711d"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"unboundModelName", "=", "\"\<Unbound3PNAlignedSpin\>\""}], ";", 
+  RowBox[{"unboundQKInfo", "=", 
+   RowBox[{"computeQKInfo", "[", 
+    RowBox[{"unboundModelName", ",", "unboundInitialData"}], "]"}]}], ";", 
+  RowBox[{"qkInfoDisplay", "[", 
+   RowBox[{"unboundModelName", ",", "unboundQKInfo"}], "]"}]}]], "Input",Expre\
+ssionUUID->"6e2c16ee-b394-cc4f-a97a-20b2416e3574"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"unboundQK0", "=", 
+   RowBox[{"computeQKPN", "[", 
+    RowBox[{
+    "\"\<Unbound3PNAlignedSpin\>\"", ",", "unboundInitialData", ",", 
+     "unboundTimes", ",", "0"}], "]"}]}], ";"}]], "Input",ExpressionUUID->\
+"6f8839d1-e444-a64c-94b5-2768337ccb52"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"unboundQK", "=", 
+   RowBox[{"computeQK", "[", 
+    RowBox[{
+    "\"\<Unbound3PNAlignedSpin\>\"", ",", "unboundInitialData", ",", 
+     "unboundTimes"}], "]"}]}], ";"}]], "Input",ExpressionUUID->"153d78c4-\
+46f3-1f4e-ba42-0260052f322a"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"unboundDirect", "=", 
+   RowBox[{"computeDirect", "[", 
+    RowBox[{"unboundInitialData", ",", "unboundTimes"}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"e1d452d9-9d6c-284d-9127-8e966b0ff478"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"unboundQKFigure", "=", 
+   RowBox[{"plotOrbit", "[", 
+    RowBox[{"\"\<unbound QK\>\"", ",", 
+     RowBox[{"Association", "[", 
+      RowBox[{
+       RowBox[{"\"\<0PN QK\>\"", "\[Rule]", "unboundQK0"}], ",", 
+       RowBox[{"\"\<QK\>\"", "\[Rule]", "unboundQK"}]}], "]"}]}], "]"}]}], 
+  ";", "unboundQKFigure"}]], "Input",ExpressionUUID->"847eb8e0-d4dc-0040-bb1e-\
+0549d2c75c03"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"unboundDirectFigure", "=", 
+   RowBox[{"plotOrbit", "[", 
+    RowBox[{"\"\<unbound direct\>\"", ",", 
+     RowBox[{"Association", "[", 
+      RowBox[{
+       RowBox[{"\"\<0PN QK\>\"", "\[Rule]", "unboundQK0"}], ",", 
+       RowBox[{
+        RowBox[{"directLabel", "[", "]"}], "\[Rule]", "unboundDirect"}]}], 
+      "]"}]}], "]"}]}], ";", "unboundDirectFigure"}]], "Input",ExpressionUUID->\
+"a75f475b-7cb3-2c40-8240-1ae1e7338633"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"unboundFigure", "=", 
+   RowBox[{"plotOrbit", "[", 
+    RowBox[{"\"\<unbound\>\"", ",", 
+     RowBox[{"Association", "[", 
+      RowBox[{
+       RowBox[{"\"\<0PN QK\>\"", "\[Rule]", "unboundQK0"}], ",", 
+       RowBox[{
+        RowBox[{"directLabel", "[", "]"}], "\[Rule]", "unboundDirect"}], ",", 
+       
+       RowBox[{"\"\<QK\>\"", "\[Rule]", "unboundQK"}]}], "]"}]}], "]"}]}], 
+  ";", "unboundFigure"}]], "Input",ExpressionUUID->"96270bc5-9bbb-f448-bce9-\
+005e7dd3ce7d"],
+
+Cell["Parabolic", "Section",ExpressionUUID->"0cceebd6-4aaf-e742-ae08-5deca23d4d16"],
+
+Cell["\<\
+Change r, phi, phidot, tStart, tEnd, and samples here. The time and radius \
+inputs are dimensionless t/M and r/M. For parabolic QK, rdot is solved \
+automatically from En == 0; parabolicVelocitySign chooses its sign. If no \
+real solution exists for that sign, the calculation reports an error.\
+\>", "Text",ExpressionUUID->"185d85cc-441b-0847-8497-015020cf8994"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"parabolicInitialData", "=", 
+   RowBox[{"cleanInitialData", "[", 
+    RowBox[{"Association", "[", 
+     RowBox[{
+      RowBox[{"\"\<r\>\"", "\[Rule]", "25"}], ",", 
+      RowBox[{"\"\<phi\>\"", "\[Rule]", 
+       FractionBox["1", "4"]}], ",", 
+      RowBox[{"\"\<phidot\>\"", "\[Rule]", "0.006`"}]}], "]"}], "]"}]}], ";", 
+  
+  RowBox[{"parabolicTimes", "=", 
+   RowBox[{"makeTimes", "[", 
+    RowBox[{"0", ",", "22", ",", "140"}], "]"}]}], ";"}]], "Input",ExpressionU\
+UID->"e689771d-27e9-7e42-8935-778d546d5f59"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"parabolicModelName", "=", "\"\<Parabolic3PNAlignedSpin\>\""}], ";", 
+  RowBox[{"parabolicQKInfo", "=", 
+   RowBox[{"computeQKInfo", "[", 
+    RowBox[{"parabolicModelName", ",", "parabolicInitialData"}], "]"}]}], ";", 
+  RowBox[{"qkInfoDisplay", "[", 
+   RowBox[{"parabolicModelName", ",", "parabolicQKInfo"}], "]"}]}]], "Input",E\
+xpressionUUID->"089e6ecc-47c2-7e45-828b-1d54eb2866df"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"parabolicQK0", "=", 
+   RowBox[{"computeQKPN", "[", 
+    RowBox[{
+    "\"\<Parabolic3PNAlignedSpin\>\"", ",", "parabolicInitialData", ",", 
+     "parabolicTimes", ",", "0"}], "]"}]}], ";"}]], "Input",ExpressionUUID->\
+"a9b81559-0e77-9543-ad26-c7a547aa68a0"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"parabolicQK", "=", 
+   RowBox[{"computeQK", "[", 
+    RowBox[{
+    "\"\<Parabolic3PNAlignedSpin\>\"", ",", "parabolicInitialData", ",", 
+     "parabolicTimes"}], "]"}]}], ";"}]], "Input",ExpressionUUID->"7e35f9a3-\
+8494-ac42-a235-1cb02a1f42aa"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"parabolicDirect", "=", 
+   RowBox[{"computeDirect", "[", 
+    RowBox[{
+     RowBox[{"parabolicQKInfo", "[", "\"\<InitialData\>\"", "]"}], ",", 
+     "parabolicTimes"}], "]"}]}], ";"}]], "Input",ExpressionUUID->"a0757921-\
+ddd9-2a45-82bf-d4030a2d591d"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"parabolicQKFigure", "=", 
+   RowBox[{"plotOrbit", "[", 
+    RowBox[{"\"\<parabolic QK\>\"", ",", 
+     RowBox[{"Association", "[", 
+      RowBox[{
+       RowBox[{"\"\<0PN QK\>\"", "\[Rule]", "parabolicQK0"}], ",", 
+       RowBox[{"\"\<QK\>\"", "\[Rule]", "parabolicQK"}]}], "]"}]}], "]"}]}], 
+  ";", "parabolicQKFigure"}]], "Input",ExpressionUUID->"03993194-c16c-1147-\
+8ee3-789c734ab456"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"parabolicDirectFigure", "=", 
+   RowBox[{"plotOrbit", "[", 
+    RowBox[{"\"\<parabolic direct\>\"", ",", 
+     RowBox[{"Association", "[", 
+      RowBox[{
+       RowBox[{"\"\<0PN QK\>\"", "\[Rule]", "parabolicQK0"}], ",", 
+       RowBox[{
+        RowBox[{"directLabel", "[", "]"}], "\[Rule]", "parabolicDirect"}]}], 
+      "]"}]}], "]"}]}], ";", "parabolicDirectFigure"}]], "Input",ExpressionUUI\
+D->"9a3828f1-961c-e14f-8cde-a17041e24732"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"parabolicFigure", "=", 
+   RowBox[{"plotOrbit", "[", 
+    RowBox[{"\"\<parabolic\>\"", ",", 
+     RowBox[{"Association", "[", 
+      RowBox[{
+       RowBox[{"\"\<0PN QK\>\"", "\[Rule]", "parabolicQK0"}], ",", 
+       RowBox[{
+        RowBox[{"directLabel", "[", "]"}], "\[Rule]", "parabolicDirect"}], 
+       ",", 
+       RowBox[{"\"\<QK\>\"", "\[Rule]", "parabolicQK"}]}], "]"}]}], "]"}]}], 
+  ";", "parabolicFigure"}]], "Input",ExpressionUUID->"f3723912-5c5e-3f47-a0c2-\
+cae1e33311eb"],
+
+Cell["Bound", "Section",ExpressionUUID->"c5f50b92-eb34-2b43-97df-0b91af20d61e"],
+
+Cell["\<\
+Change r, phi, rdot, phidot, tStart, tEnd, and samples here. The time and \
+radius inputs are dimensionless t/M and r/M.\
+\>", "Text",ExpressionUUID->"12c4315d-b829-b34d-97c8-8b072b2f63f7"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"boundInitialData", "=", 
+   RowBox[{"cleanInitialData", "[", 
+    RowBox[{"Association", "[", 
+     RowBox[{
+      RowBox[{"\"\<r\>\"", "\[Rule]", "20"}], ",", 
+      RowBox[{"\"\<phi\>\"", "\[Rule]", 
+       FractionBox["3", "10"]}], ",", 
+      RowBox[{"\"\<rdot\>\"", "\[Rule]", "0.08`"}], ",", 
+      RowBox[{"\"\<phidot\>\"", "\[Rule]", "0.011`"}]}], "]"}], "]"}]}], ";", 
+  
+  RowBox[{"boundTimes", "=", 
+   RowBox[{"makeTimes", "[", 
+    RowBox[{"0", ",", "55", ",", "170"}], "]"}]}], ";"}]], "Input",ExpressionU\
+UID->"7c86c7ac-bc0b-5247-8d45-888143176182"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"boundModelName", "=", "\"\<Bound3PNAlignedSpin\>\""}], ";", 
+  RowBox[{"boundQKInfo", "=", 
+   RowBox[{"computeQKInfo", "[", 
+    RowBox[{"boundModelName", ",", "boundInitialData"}], "]"}]}], ";", 
+  RowBox[{"qkInfoDisplay", "[", 
+   RowBox[{"boundModelName", ",", "boundQKInfo"}], "]"}]}]], "Input",Expressio\
+nUUID->"a757ff77-0482-4942-b5a7-14b3d870e13f"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"boundQK0", "=", 
+   RowBox[{"computeQKPN", "[", 
+    RowBox[{
+    "\"\<Bound3PNAlignedSpin\>\"", ",", "boundInitialData", ",", "boundTimes",
+      ",", "0"}], "]"}]}], ";"}]], "Input",ExpressionUUID->"e9ff1419-9606-\
+d540-9906-5ed980cf4670"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"boundQK", "=", 
+   RowBox[{"computeQK", "[", 
+    RowBox[{
+    "\"\<Bound3PNAlignedSpin\>\"", ",", "boundInitialData", ",", 
+     "boundTimes"}], "]"}]}], ";"}]], "Input",ExpressionUUID->"b0eb2995-c8d3-\
+c349-9cf6-5c74c1d39e75"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"boundDirect", "=", 
+   RowBox[{"computeDirect", "[", 
+    RowBox[{"boundInitialData", ",", "boundTimes"}], "]"}]}], ";"}]], "Input",\
+ExpressionUUID->"e6e73f4e-b834-1343-b4d1-2e700b8619d1"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"boundQKFigure", "=", 
+   RowBox[{"plotOrbit", "[", 
+    RowBox[{"\"\<bound QK\>\"", ",", 
+     RowBox[{"Association", "[", 
+      RowBox[{
+       RowBox[{"\"\<0PN QK\>\"", "\[Rule]", "boundQK0"}], ",", 
+       RowBox[{"\"\<QK\>\"", "\[Rule]", "boundQK"}]}], "]"}]}], "]"}]}], ";", 
+  "boundQKFigure"}]], "Input",ExpressionUUID->"605b01b0-3715-1f41-adca-\
+a0f25c1501f0"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"boundDirectFigure", "=", 
+   RowBox[{"plotOrbit", "[", 
+    RowBox[{"\"\<bound direct\>\"", ",", 
+     RowBox[{"Association", "[", 
+      RowBox[{
+       RowBox[{"\"\<0PN QK\>\"", "\[Rule]", "boundQK0"}], ",", 
+       RowBox[{
+        RowBox[{"directLabel", "[", "]"}], "\[Rule]", "boundDirect"}]}], 
+      "]"}]}], "]"}]}], ";", "boundDirectFigure"}]], "Input",ExpressionUUID->\
+"352c0a98-bd5b-2342-98fe-4ecefc939bed"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"boundFigure", "=", 
+   RowBox[{"plotOrbit", "[", 
+    RowBox[{"\"\<bound\>\"", ",", 
+     RowBox[{"Association", "[", 
+      RowBox[{
+       RowBox[{"\"\<0PN QK\>\"", "\[Rule]", "boundQK0"}], ",", 
+       RowBox[{
+        RowBox[{"directLabel", "[", "]"}], "\[Rule]", "boundDirect"}], ",", 
+       RowBox[{"\"\<QK\>\"", "\[Rule]", "boundQK"}]}], "]"}]}], "]"}]}], ";", 
+  "boundFigure"}]], "Input",ExpressionUUID->"e8212a12-311b-9f45-a483-\
+769618f33c0c"],
+
+Cell["Optional Export", "Section",ExpressionUUID->"bc446a08-ec60-0f4a-9ccf-0b40d137dbee"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"outDir", "=", 
+   RowBox[{"FileNameJoin", "[", 
+    RowBox[{"{", 
+     RowBox[{
+     "root", ",", "\"\<outputs\>\"", ",", 
+      "\"\<qk_vs_direct_three_orbits\>\""}], "}"}], "]"}]}], ";", 
+  RowBox[{"exportOrbit", "[", 
+   RowBox[{
+   "\"\<unbound\>\"", ",", "unboundQKInfo", ",", "unboundQK", ",", 
+    "unboundDirect", ",", "unboundQKFigure", ",", "unboundDirectFigure", ",", 
+    "unboundFigure"}], "]"}], ";", 
+  RowBox[{"exportOrbit", "[", 
+   RowBox[{
+   "\"\<parabolic\>\"", ",", "parabolicQKInfo", ",", "parabolicQK", ",", 
+    "parabolicDirect", ",", "parabolicQKFigure", ",", "parabolicDirectFigure",
+     ",", "parabolicFigure"}], "]"}], ";", 
+  RowBox[{"exportOrbit", "[", 
+   RowBox[{
+   "\"\<bound\>\"", ",", "boundQKInfo", ",", "boundQK", ",", "boundDirect", 
+    ",", "boundQKFigure", ",", "boundDirectFigure", ",", "boundFigure"}], 
+   "]"}], ";", "outDir"}]], "Input",ExpressionUUID->"a3f01154-0530-7b4d-9f75-\
+c00b3e71f9b7"]
+},
+WindowSize->{1120, 820},
+WindowMargins->{{Automatic, 80}, {Automatic, 40}},
+FrontEndVersion->"14.0 for Microsoft Windows (64-bit) (2023\:5e7412\:670812\
+\:65e5)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"f4a894e7-01e4-3c41-a06e-8f130fd751c1"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 88, 0, 70, "Title",ExpressionUUID->"d502abf3-4302-034a-9b10-c4bb94a838dd"],
+Cell[649, 22, 646, 9, 70, "Text",ExpressionUUID->"b6412b70-dc0d-7548-94b4-574336907fa2"],
+Cell[CellGroupData[{
+Cell[1320, 35, 79, 0, 70, "Section",ExpressionUUID->"6c005209-ed17-d045-8546-a96992e5c5f5"],
+Cell[1402, 37, 17883, 445, 70, "Input",ExpressionUUID->"a56b2d00-f9ef-574b-bc71-a8da48a456d1"]
+}, Closed]],
+Cell[19300, 485, 87, 0, 70, "Section",ExpressionUUID->"09dd31ff-1a5a-be43-97d3-cb31409ac08e"],
+Cell[19390, 487, 477, 7, 70, "Text",ExpressionUUID->"f201103f-db9b-5c4f-b58f-c56b5c6efeeb"],
+Cell[19870, 496, 1190, 27, 70, "Input",ExpressionUUID->"b9f32630-c2a3-cf46-a76a-cc6988d6f3dc"],
+Cell[21063, 525, 81, 0, 70, "Section",ExpressionUUID->"3679bae6-78ee-fd40-a530-0dbcc3de7156"],
+Cell[21147, 527, 199, 3, 70, "Text",ExpressionUUID->"335fef4f-f7b8-b540-a74c-92876ae5f00d"],
+Cell[21349, 532, 599, 14, 70, "Input",ExpressionUUID->"6292d961-4bc8-1c4b-8fa7-c94cafd4711d"],
+Cell[21951, 548, 406, 8, 70, "Input",ExpressionUUID->"6e2c16ee-b394-cc4f-a97a-20b2416e3574"],
+Cell[22360, 558, 284, 7, 70, "Input",ExpressionUUID->"6f8839d1-e444-a64c-94b5-2768337ccb52"],
+Cell[22647, 567, 271, 7, 70, "Input",ExpressionUUID->"153d78c4-46f3-1f4e-ba42-0260052f322a"],
+Cell[22921, 576, 231, 5, 70, "Input",ExpressionUUID->"e1d452d9-9d6c-284d-9127-8e966b0ff478"],
+Cell[23155, 583, 414, 10, 70, "Input",ExpressionUUID->"847eb8e0-d4dc-0040-bb1e-0549d2c75c03"],
+Cell[23572, 595, 464, 11, 70, "Input",ExpressionUUID->"a75f475b-7cb3-2c40-8240-1ae1e7338633"],
+Cell[24039, 608, 510, 13, 70, "Input",ExpressionUUID->"96270bc5-9bbb-f448-bce9-005e7dd3ce7d"],
+Cell[24552, 623, 83, 0, 70, "Section",ExpressionUUID->"0cceebd6-4aaf-e742-ae08-5deca23d4d16"],
+Cell[24638, 625, 374, 5, 70, "Text",ExpressionUUID->"185d85cc-441b-0847-8497-015020cf8994"],
+Cell[25015, 632, 549, 14, 70, "Input",ExpressionUUID->"e689771d-27e9-7e42-8935-778d546d5f59"],
+Cell[25567, 648, 420, 8, 70, "Input",ExpressionUUID->"089e6ecc-47c2-7e45-828b-1d54eb2866df"],
+Cell[25990, 658, 292, 7, 70, "Input",ExpressionUUID->"a9b81559-0e77-9543-ad26-c7a547aa68a0"],
+Cell[26285, 667, 279, 7, 70, "Input",ExpressionUUID->"7e35f9a3-8494-ac42-a235-1cb02a1f42aa"],
+Cell[26567, 676, 286, 7, 70, "Input",ExpressionUUID->"a0757921-ddd9-2a45-82bf-d4030a2d591d"],
+Cell[26856, 685, 424, 10, 70, "Input",ExpressionUUID->"03993194-c16c-1147-8ee3-789c734ab456"],
+Cell[27283, 697, 474, 11, 70, "Input",ExpressionUUID->"9a3828f1-961c-e14f-8cde-a17041e24732"],
+Cell[27760, 710, 522, 13, 70, "Input",ExpressionUUID->"f3723912-5c5e-3f47-a0c2-cae1e33311eb"],
+Cell[28285, 725, 79, 0, 70, "Section",ExpressionUUID->"c5f50b92-eb34-2b43-97df-0b91af20d61e"],
+Cell[28367, 727, 199, 3, 70, "Text",ExpressionUUID->"12c4315d-b829-b34d-97c8-8b072b2f63f7"],
+Cell[28569, 732, 600, 15, 70, "Input",ExpressionUUID->"7c86c7ac-bc0b-5247-8d45-888143176182"],
+Cell[29172, 749, 392, 8, 70, "Input",ExpressionUUID->"a757ff77-0482-4942-b5a7-14b3d870e13f"],
+Cell[29567, 759, 276, 7, 70, "Input",ExpressionUUID->"e9ff1419-9606-d540-9906-5ed980cf4670"],
+Cell[29846, 768, 263, 7, 70, "Input",ExpressionUUID->"b0eb2995-c8d3-c349-9cf6-5c74c1d39e75"],
+Cell[30112, 777, 224, 5, 70, "Input",ExpressionUUID->"e6e73f4e-b834-1343-b4d1-2e700b8619d1"],
+Cell[30339, 784, 404, 10, 70, "Input",ExpressionUUID->"605b01b0-3715-1f41-adca-a0f25c1501f0"],
+Cell[30746, 796, 454, 11, 70, "Input",ExpressionUUID->"352c0a98-bd5b-2342-98fe-4ecefc939bed"],
+Cell[31203, 809, 490, 12, 70, "Input",ExpressionUUID->"e8212a12-311b-9f45-a483-769618f33c0c"],
+Cell[31696, 823, 89, 0, 70, "Section",ExpressionUUID->"bc446a08-ec60-0f4a-9ccf-0b40d137dbee"],
+Cell[31788, 825, 979, 23, 70, "Input",ExpressionUUID->"a3f01154-0530-7b4d-9f75-c00b3e71f9b7"]
+}
+]
+*)
+
+(* End of internal cache information *)
