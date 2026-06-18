@@ -1,12 +1,12 @@
 # QK Orbits
 
-Tools for conservative PN quasi-Keplerian (QK)
-orbits and direct polar-EOM evolution for aligned-spin compact binaries.
+Tools for conservative PN quasi-Keplerian (QK) orbits and direct polar-EOM evolution for aligned-spin compact binaries.
 
 ![Bound extreme aligned-spin QK orbit](docs/bound_extreme_spin_promo.png)
 
 <p align="center"><sub>(input: <code>En=-1/2000</code>, <code>L=14</code>, <code>eps=1</code>, <code>nu=1/4</code>, <code>delta=0</code>, <code>chiS=1</code>, <code>chiA=0</code>, <code>kappaS=0</code>, <code>kappaA=0</code>, <code>SO=1</code>)<br>
-(QK parameters: <code>n=0.00003156045359033833</code>, <code>K=1.0146059311639184</code>, <code>a_r=998.4872255108467</code>, <code>e_r=0.8993053072175136</code>, <code>e_t=0.8961268723821495</code>, <code>e_phi=0.899420582549924</code>, <code>f_phi=0.000015046180398609838</code>, <code>g_phi=6.009778722053774e-8</code>, <code>h_phi=7.678475281627262e-9</code>, <code>i_phi=0</code>, <code>g_t=0.00001363334233196573</code>, <code>f_t=5.877786734211771e-7</code>, <code>h_t=-1.5045981436324583e-8</code>, <code>i_t=0</code>)</sub></p>
+(QK parameters: <code>n=0.00003156045359033833</code>, <code>K=1.0146059311639184</code>, <code>a_r=998.4872255108467</code>, <code>e_r=0.8993053072175136</code>, <code>e_t=0.8961268723821495</code>, <code>e_phi=0.899420582549924</code>)<br>
+(<code>f_phi=0.000015046180398609838</code>, <code>g_phi=6.009778722053774e-8</code>, <code>h_phi=7.678475281627262e-9</code>, <code>i_phi=0</code>, <code>g_t=0.00001363334233196573</code>, <code>f_t=5.877786734211771e-7</code>, <code>h_t=-1.5045981436324583e-8</code>, <code>i_t=0</code>)</sub></p>
 
 The two public orbit generators have the same practical input shape:
 
@@ -31,9 +31,7 @@ Unbound3PNAlignedSpin    hyperbolic conservative QK orbit
 Parabolic3PNAlignedSpin  quasi-parabolic conservative QK orbit
 ```
 
-All three models use the same aligned-spin conservative content through
-3PN: nonspinning 0PN--3PN, spin-orbit 1.5PN and 2.5PN, and spin-spin 2PN
-and 3PN.
+All three models use the same aligned-spin conservative content through 3PN: nonspinning 0PN--3PN, spin-orbit 1.5PN and 2.5PN, and spin-spin 2PN and 3PN.
 
 ## Quick Start
 
@@ -73,8 +71,7 @@ direct = DirectEOMOrbit[eom, primitiveParams, initialData, times,
   "PNOrder" -> 3];
 ```
 
-`qkInfo` contains the conservative labels and QK parameters fixed by the
-initial state:
+`qkInfo` contains the conservative labels and QK parameters fixed by the initial state:
 
 ```wl
 qkInfo["ConservedLabels"]
@@ -87,9 +84,7 @@ qkInfo["QKParameters"]
 (* <|"n" -> ..., "K" -> ..., "ar" -> ..., ...|> *)
 ```
 
-For the parabolic QK model, do not tune a four-field initial state by hand.
-Supply $r,\phi$, and exactly one velocity component.  For example, this
-solves $\dot r$ from $E_n=0$:
+For the parabolic QK model, do not tune a four-field initial state by hand. Supply $r,\phi$, and exactly one velocity component.  For example, this solves $\dot r$ from $E_n=0$:
 
 ```wl
 parabolicInput = <|
@@ -107,11 +102,7 @@ parabolicInfo["InitialData"]
 (* completed {r, phi, rdot, phidot} *)
 ```
 
-Use `"ParabolicVelocitySign" -> -1` for the opposite missing-velocity branch:
-incoming radial motion when solving $\dot r$, or retrograde angular motion
-when solving $\dot\phi$.  If no real missing velocity with the requested
-sign solves $E_n=0$, the parabolic setup returns `$Failed` with an error
-message.
+Use `"ParabolicVelocitySign" -> -1` for the opposite missing-velocity branch: incoming radial motion when solving $\dot r$, or retrograde angular motion when solving $\dot\phi$.  If no real missing velocity with the requested sign solves $E_n=0$, the parabolic setup returns `$Failed` with an error message.
 
 Allowed PN truncations are exactly
 
@@ -122,8 +113,7 @@ DirectEOMAllowedPNOrders[]
 (* {0, 1, 1.5, 2, 2.5, 3} *)
 ```
 
-`PNOrder` is the truncation switch.  `eps` is separate: it is the PN
-bookkeeping parameter appearing in the formulas,
+`PNOrder` is the truncation switch.  `eps` is separate: it is the PN bookkeeping parameter appearing in the formulas,
 
 $$
 0{\rm PN}\sim \epsilon^0,\quad
@@ -134,9 +124,7 @@ $$
 3{\rm PN}\sim \epsilon^6 .
 $$
 
-Use `eps -> 1` for the physical PN series.  This is the default used by the
-examples.  Smaller values are bookkeeping diagnostics only; do not use them
-for a physical orbit.
+Use `eps -> 1` for the physical PN series.  This is the default used by the examples.  Smaller values are bookkeeping diagnostics only; do not use them for a physical orbit.
 
 ## Scope
 
@@ -166,9 +154,7 @@ t_{\rm code}=\frac{c^3t_{\rm phys}}{GM}=\frac{t_{\rm phys}}{M},
 r_{\rm code}=\frac{c^2r_{\rm phys}}{GM}=\frac{r_{\rm phys}}{M}.
 $$
 
-Thus the plot axes are labelled as $t/M$ and $r/M$.  The angle $\phi$
-is dimensionless, $\dot r=dr_{\rm code}/dt_{\rm code}$, and the returned
-angular velocity is
+Thus the plot axes are labelled as $t/M$ and $r/M$.  The angle $\phi$ is dimensionless, $\dot r=dr_{\rm code}/dt_{\rm code}$, and the returned angular velocity is
 
 $$
 \dot\phi_{\rm code}=\frac{d\phi}{dt_{\rm code}}
@@ -191,8 +177,7 @@ $$
 \chi_1,\quad \chi_2,\quad \kappa_1,\quad \kappa_2 ,
 $$
 
-where $\chi_A$ are dimensionless spins and $\kappa_A$ are spin-induced
-quadrupole parameters.  Internally the QK formulas use
+where $\chi_A$ are dimensionless spins and $\kappa_A$ are spin-induced quadrupole parameters.  Internally the QK formulas use
 
 $$
 \chi_S=\frac{\chi_1+\chi_2}{2},\qquad
@@ -214,29 +199,17 @@ spin-orbit: 1.5PN, 2.5PN
 spin-spin:  2PN, 3PN
 ```
 
-The model is aligned-spin only.  It does not include spin precession,
-cubic-in-spin terms, 3.5PN spin-orbit terms, 4PN nonspinning terms, or
-nonlocal tail dynamics.
+The model is aligned-spin only.  It does not include spin precession, cubic-in-spin terms, 3.5PN spin-orbit terms, 4PN nonspinning terms, or nonlocal tail dynamics.
 
 ## Gauge Choices
 
-These are coordinate-gauge dependent PN formulas, not gauge-invariant
-observables by themselves.  The implemented orbital dynamics is written in
-the harmonic/modified-harmonic coordinate choice used by the source PN
-equations of motion, after reduction to the PN center-of-mass frame and to
-polar relative variables $(r,\phi,\dot r,\dot\phi)$.
+These are coordinate-gauge dependent PN formulas, not gauge-invariant observables by themselves.  The implemented orbital dynamics is written in the harmonic/modified-harmonic coordinate choice used by the source PN equations of motion, after reduction to the PN center-of-mass frame and to polar relative variables $(r,\phi,\dot r,\dot\phi)$.
 
-The spin terms use aligned spins represented by conserved Euclidean-norm
-spin vectors.  In the source harmonic-gauge spin calculations these vectors
-are constructed from a spin tensor satisfying the covariant, or Tulczyjew,
-spin supplementary condition
-$S^{\mu\nu}p_\nu=0$, where $p_\nu$ is the particle four-momentum.
+The spin terms use aligned spins represented by conserved Euclidean-norm spin vectors.  In the source harmonic-gauge spin calculations these vectors are constructed from a spin tensor satisfying the covariant, or Tulczyjew, spin supplementary condition $S^{\mu\nu}p_\nu=0$, where $p_\nu$ is the particle four-momentum.
 
 ## QK Form
 
-The QK representation rewrites the conservative orbit using an anomaly
-variable.  The anomaly solves a Kepler-like time equation, while $r$ and
-$\phi$ are explicit functions of that anomaly.
+The QK representation rewrites the conservative orbit using an anomaly variable.  The anomaly solves a Kepler-like time equation, while $r$ and $\phi$ are explicit functions of that anomaly. This construction goes back to the 1PN quasi-Keplerian solution of Damour and Deruelle.  Later generalized QK parametrizations extended the same idea to higher PN order and to the multiple-eccentricity structure used below.
 
 For bound orbits:
 
@@ -311,8 +284,7 @@ a_r,e_r,e_t,e_\phi,n,K,
 g_t,f_t,h_t,i_t,f_\phi,g_\phi,h_\phi,i_\phi .
 $$
 
-They are not independent inputs.  They are PN series determined by the
-conserved orbital labels and binary parameters,
+They are not independent inputs.  They are PN series determined by the conserved orbital labels and binary parameters,
 
 $$
 X_{\rm QK}
@@ -333,10 +305,7 @@ a_r=-\frac{1}{2E_n}\quad(E_n<0),\qquad
 a_r=\frac{1}{2E_n}\quad(E_n>0).
 $$
 
-The high-level function `QKParameterValuesFromInitialData` evaluates the
-conserved energy and angular momentum from the supplied
-$(r,\phi,\dot r,\dot\phi)$ using the retained 3PN aligned-spin conserved
-quantities, then evaluates the QK parameters in the same PN truncation:
+The high-level function `QKParameterValuesFromInitialData` evaluates the conserved energy and angular momentum from the supplied $(r,\phi,\dot r,\dot\phi)$ using the retained 3PN aligned-spin conserved quantities, then evaluates the QK parameters in the same PN truncation:
 
 ```wl
 qkInfo = QKParameterValuesFromInitialData[model, primitiveParams,
@@ -353,28 +322,20 @@ OrbitParameters  -> labels plus the QK spin combinations used internally
 QKParameters     -> QK elements with labels and binary parameters inserted
 ```
 
-`QKOrbitFromInitialData` uses the same construction internally and returns
-only the trajectory.  If the labels alone are needed:
+`QKOrbitFromInitialData` uses the same construction internally and returns only the trajectory.  If the labels alone are needed:
 
 ```wl
 labels = QKLabelsFromInitialData[primitiveParams, initialData,
   "PNOrder" -> 3]
 ```
 
-For a parabolic QK orbit the high-level interface enforces the marginally
-bound surface $E_n=0$.  Provide $r,\phi$, and exactly one of
-$\dot r,\dot\phi$; the missing velocity is solved from $E_n=0$.  The option
-`"ParabolicVelocitySign" -> 1|-1` selects the sign of the missing component.
-The completed four-field initial state is returned as `qkInfo["InitialData"]`
-and should be used when launching a direct-EOM comparison.
+For a parabolic QK orbit the high-level interface enforces the marginally bound surface $E_n=0$.  Provide $r,\phi$, and exactly one of $\dot r,\dot\phi$; the missing velocity is solved from $E_n=0$.  The option `"ParabolicVelocitySign" -> 1|-1` selects the sign of the missing component. The completed four-field initial state is returned as `qkInfo["InitialData"]` and should be used when launching a direct-EOM comparison.
 
-For a bound QK orbit the completed initial state must give $E_n<0$ at the
-requested `PNOrder`; otherwise the high-level setup returns `$Failed`.
+For a bound QK orbit the completed initial state must give $E_n<0$ at the requested `PNOrder`; otherwise the high-level setup returns `$Failed`.
 
 ## Direct EOM
 
-The direct numerical generator integrates the explicit second-order polar
-equations
+The direct numerical generator integrates the explicit second-order polar equations
 
 $$
 \frac{dr}{dt}=\dot r,\qquad
@@ -393,19 +354,15 @@ s=\frac{1}{r},\qquad v_t=r\dot\phi=\frac{\dot\phi}{s},\qquad
 v^2=\dot r^2+v_t^2 .
 $$
 
-The direct integrator can optionally add the leading nonspinning 2.5PN
-radiation-reaction acceleration:
+The direct integrator can optionally add the leading nonspinning 2.5PN radiation-reaction acceleration:
 
 ```wl
 "Include2p5PNRadiationReaction" -> True
 ```
 
-This option is off by default.  With it enabled, the direct EOM is dissipative
-and is not expected to coincide with the conservative QK trajectory.
+This option is off by default.  With it enabled, the direct EOM is dissipative and is not expected to coincide with the conservative QK trajectory.
 
-For speed, `DirectEOMOrbit` defaults to machine precision, automatic accuracy
-goals, automatic method choice, and automatic step size.  The earlier
-high-precision validation settings
+For speed, `DirectEOMOrbit` defaults to machine precision, automatic accuracy goals, automatic method choice, and automatic step size.  The earlier high-precision validation settings
 
 ```wl
 WorkingPrecision -> 40,
@@ -414,8 +371,7 @@ PrecisionGoal -> 20,
 MaxStepSize -> 1/2
 ```
 
-are intentionally not the interactive defaults; they are useful for
-regression checks, but they make the numerical orbit generator much slower.
+are intentionally not the interactive defaults; they are useful for regression checks, but they make the numerical orbit generator much slower.
 
 The implemented harmonic-gauge terms are
 
@@ -436,15 +392,13 @@ $$
 
 ## Bound-Unbound Mapping
 
-One structural check used in this project is the relation between the bound
-and hyperbolic QK forms.  In the same coordinate convention, after imposing
+One structural check used in this project is the relation between the bound and hyperbolic QK forms.  In the same coordinate convention, after imposing
 
 $$
 \delta^2=1-4\nu ,
 $$
 
-the retained aligned-spin radial and angular sectors obey direct analytic
-continuation:
+the retained aligned-spin radial and angular sectors obey direct analytic continuation:
 
 $$
 a_r^{\rm hyp}=-(a_r^{\rm bound})^{\rm cont},\qquad
@@ -456,11 +410,9 @@ K^{\rm hyp}=K^{\rm bound,cont},\qquad
 e_\phi^{\rm hyp}=e_\phi^{\rm bound,cont}.
 $$
 
-The angular harmonic coefficients continue in the same way after the usual
-bound/hyperbolic anomaly relabeling.
+The angular harmonic coefficients continue in the same way after the usual bound/hyperbolic anomaly relabeling.
 
-The time sector needs a zero-mode normalization step.  Direct continuation of
-the bound time equation naturally gives a hyperbolic basis containing
+The time sector needs a zero-mode normalization step.  Direct continuation of the bound time equation naturally gives a hyperbolic basis containing
 
 $$
 F_{vu}(v-u)+F_v\sin v .
@@ -491,8 +443,7 @@ F_{vu}(v-u)
  =F_{vu}v-qF_{vu}\sinh u+n_0F_{vu}(t-t_0).
 $$
 
-Moving the last term to the left-hand side gives the standard hyperbolic
-normalization shift
+Moving the last term to the left-hand side gives the standard hyperbolic normalization shift
 
 $$
 n_{\rm std}=n_{vu}-n_0F_{vu},\qquad
@@ -503,9 +454,7 @@ $$
 g_t=F_{vu},\qquad f_t=F_v .
 $$
 
-Thus $F_{vu}$ and $F_v$ continue directly, while $n$ and $e_t$ do not
-continue label by label.  In the pure nonspinning 3PN normalization this same
-projection can be written as
+Thus $F_{vu}$ and $F_v$ continue directly, while $n$ and $e_t$ do not continue label by label.  In the pure nonspinning 3PN normalization this same projection can be written as
 
 $$
 n_{\rm std}=(1-F_{vu})n_{vu},\qquad
@@ -555,15 +504,9 @@ plotOrbit["unbound", <|"direct EOM" -> unboundDirect,
   "QK" -> unboundQK|>]
 ```
 
-In all example plots the red curve labelled `0PN QK` is the Newtonian QK
-trajectory generated from the same initial data.  It is a visual baseline,
-not a separate numerical integration.  In overlay plots the direct-EOM curve
-is drawn first and the black dashed QK curve second, so the QK line remains
-visible on top.
+In all example plots the red curve labelled `0PN QK` is the Newtonian QK trajectory generated from the same initial data.  It is a visual baseline, not a separate numerical integration.  In overlay plots the direct-EOM curve is drawn first and the black dashed QK curve second, so the QK line remains visible on top.
 
-The editable notebook displays the full `QKParameters` association returned
-by `QKParameterValuesFromInitialData`.  The command-line example writes the
-same full association to each `*_qk_parameters.wl` file.
+The editable notebook displays the full `QKParameters` association returned by `QKParameterValuesFromInitialData`.  The command-line example writes the same full association to each `*_qk_parameters.wl` file.
 
 Regression tests:
 
@@ -575,6 +518,8 @@ wolframscript -script .\qk-orbits-release\tests\test_direct_eom.wls
 
 ## References
 
+- T. Damour and N. Deruelle, "General relativistic celestial mechanics of binary systems. I. The post-newtonian motion", [Numdam](https://www.numdam.org/item/AIHPA_1985__43_1_107_0/).
+- T. Damour and N. Deruelle, "General relativistic celestial mechanics of binary systems. II. The post-newtonian timing formula", [Numdam](https://www.numdam.org/item/AIHPA_1986__44_3_263_0/).
 - L. Blanchet and B. R. Iyer, "Third post-Newtonian dynamics of compact binaries: equations of motion in the center-of-mass frame", [arXiv:gr-qc/0209089](https://arxiv.org/abs/gr-qc/0209089) (3PN nonspinning harmonic-coordinate center-of-mass dynamics).
 - R.-M. Memmesheimer, A. Gopakumar, and G. Schaefer, "Third post-Newtonian accurate generalized quasi-Keplerian parametrization for compact binaries in eccentric orbits", [arXiv:gr-qc/0407049](https://arxiv.org/abs/gr-qc/0407049) (3PN nonspinning bound QK parametrization).
 - S. Marsat, A. Bohe, G. Faye, and L. Blanchet, "Next-to-next-to-leading order spin-orbit effects in the equations of motion of compact binary systems", [arXiv:1210.4143](https://arxiv.org/abs/1210.4143) (spin-orbit harmonic-coordinate equations of motion).
