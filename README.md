@@ -2,7 +2,7 @@
 
 Tools for conservative PN quasi-Keplerian (QK) orbits and direct polar-EOM evolution for aligned-spin compact binaries.
 
-![Bound extreme aligned-spin QK orbit](docs/bound_extreme_spin_promo.png)
+<img src="docs/bound_extreme_spin_promo.png" alt="Bound extreme aligned-spin QK orbit" style="zoom: 10%;" />
 
 <p align="center"><sub>(input: <code>En=-1/2000</code>, <code>L=14</code>, <code>eps=1</code>, <code>nu=1/4</code>, <code>delta=0</code>, <code>chiS=1</code>, <code>chiA=0</code>, <code>kappaS=0</code>, <code>kappaA=0</code>, <code>SO=1</code>; QK parameters: <code>n=0.00003156045359033833</code>, <code>K=1.0146059311639184</code>, <code>a_r=998.4872255108467</code>, <code>e_r=0.8993053072175136</code>, <code>e_t=0.8961268723821495</code>, <code>e_phi=0.899420582549924</code>, <code>f_phi=0.000015046180398609838</code>, <code>g_phi=6.009778722053774e-8</code>, <code>h_phi=7.678475281627262e-9</code>, <code>i_phi=0</code>, <code>g_t=0.00001363334233196573</code>, <code>f_t=5.877786734211771e-7</code>, <code>h_t=-1.5045981436324583e-8</code>, <code>i_t=0</code>)</sub></p>
 
@@ -198,11 +198,9 @@ spin-orbit: 1.5PN, 2.5PN
 spin-spin:  2PN, 3PN
 ```
 
-The model is aligned-spin only.  It does not include spin precession, cubic-in-spin terms, 3.5PN spin-orbit terms, 4PN nonspinning terms, or nonlocal tail dynamics.
-
 ## Gauge Choices
 
-These are coordinate-gauge dependent PN formulas, not gauge-invariant observables by themselves.  The implemented orbital dynamics is written in the harmonic/modified-harmonic coordinate choice used by the source PN equations of motion, after reduction to the PN center-of-mass frame and to polar relative variables $(r,\phi,\dot r,\dot\phi)$.
+These are coordinate-gauge dependent PN formulas, not gauge-invariant observables by themselves.  The implemented nonspinning 3PN sector is in modified harmonic coordinates.  The spin-orbit and spin-spin sectors are taken from harmonic-coordinate aligned-spin equations of motion, after reduction to the PN center-of-mass frame and to polar relative variables $(r,\phi,\dot r,\dot\phi)$.
 
 The spin terms use aligned spins represented by conserved Euclidean-norm spin vectors.  In the source harmonic-gauge spin calculations these vectors are constructed from a spin tensor satisfying the covariant, or Tulczyjew, spin supplementary condition $S^{\mu\nu}p_\nu=0$, where $p_\nu$ is the particle four-momentum.
 
@@ -519,9 +517,9 @@ wolframscript -script .\qk-orbits-release\tests\test_direct_eom.wls
 
 - T. Damour and N. Deruelle, "General relativistic celestial mechanics of binary systems. I. The post-newtonian motion", [Numdam](https://www.numdam.org/item/AIHPA_1985__43_1_107_0/).
 - T. Damour and N. Deruelle, "General relativistic celestial mechanics of binary systems. II. The post-newtonian timing formula", [Numdam](https://www.numdam.org/item/AIHPA_1986__44_3_263_0/).
-- L. Blanchet and B. R. Iyer, "Third post-Newtonian dynamics of compact binaries: equations of motion in the center-of-mass frame", [arXiv:gr-qc/0209089](https://arxiv.org/abs/gr-qc/0209089) (3PN nonspinning harmonic-coordinate center-of-mass dynamics).
-- R.-M. Memmesheimer, A. Gopakumar, and G. Schaefer, "Third post-Newtonian accurate generalized quasi-Keplerian parametrization for compact binaries in eccentric orbits", [arXiv:gr-qc/0407049](https://arxiv.org/abs/gr-qc/0407049) (3PN nonspinning bound QK parametrization).
-- S. Marsat, A. Bohe, G. Faye, and L. Blanchet, "Next-to-next-to-leading order spin-orbit effects in the equations of motion of compact binary systems", [arXiv:1210.4143](https://arxiv.org/abs/1210.4143) (spin-orbit harmonic-coordinate equations of motion).
-- A. Bohe, S. Marsat, G. Faye, and L. Blanchet, "Next-to-next-to-leading order spin-orbit effects in the near-zone metric and precession equations of compact binaries", [arXiv:1212.5520](https://arxiv.org/abs/1212.5520) (conserved-norm spin variables and spin-orbit center-of-mass reduction).
-- L. Blanchet, G. Faye, S. Marsat, and E. K. Porter, "Quadratic-in-spin effects in the orbital dynamics and gravitational-wave energy flux of compact binaries at the 3PN order", [arXiv:1501.01529](https://arxiv.org/abs/1501.01529) (quadratic-in-spin 3PN dynamics).
-- Q. Henry and M. Khalil, "Spin effects in gravitational waveforms and fluxes for binaries on eccentric orbits to the third post-Newtonian order", [arXiv:2308.13606](https://arxiv.org/abs/2308.13606) (aligned-spin eccentric-orbit QK sectors and harmonic/covariant-SSC conventions).
+- L. Blanchet and B. R. Iyer, "Third post-Newtonian dynamics of compact binaries: equations of motion in the center-of-mass frame", [arXiv:gr-qc/0209089](https://arxiv.org/abs/gr-qc/0209089).
+- R.-M. Memmesheimer, A. Gopakumar, and G. Schaefer, "Third post-Newtonian accurate generalized quasi-Keplerian parametrization for compact binaries in eccentric orbits", [arXiv:gr-qc/0407049](https://arxiv.org/abs/gr-qc/0407049).
+- S. Marsat, A. Bohe, G. Faye, and L. Blanchet, "Next-to-next-to-leading order spin-orbit effects in the equations of motion of compact binary systems", [arXiv:1210.4143](https://arxiv.org/abs/1210.4143).
+- A. Bohe, S. Marsat, G. Faye, and L. Blanchet, "Next-to-next-to-leading order spin-orbit effects in the near-zone metric and precession equations of compact binaries", [arXiv:1212.5520](https://arxiv.org/abs/1212.5520).
+- L. Blanchet, G. Faye, S. Marsat, and E. K. Porter, "Quadratic-in-spin effects in the orbital dynamics and gravitational-wave energy flux of compact binaries at the 3PN order", [arXiv:1501.01529](https://arxiv.org/abs/1501.01529).
+- Q. Henry and M. Khalil, "Spin effects in gravitational waveforms and fluxes for binaries on eccentric orbits to the third post-Newtonian order", [arXiv:2308.13606](https://arxiv.org/abs/2308.13606).
