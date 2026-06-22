@@ -519,7 +519,7 @@ gPhi, iPhi are signed-odd,
 j^2 ePhi^2 is signed-even,
 ```
 
-where "signed" means the simultaneous transformation $(j,\chi_A,\chi_S)\to(-j,-\chi_A,-\chi_S)$.  The last condition fixes the infinity branch as $v_\infty=\pi/2+\text{signed-odd terms}$.  Therefore the nonconstant angular pieces cancel in the signed sum, and the remaining invariant is exactly $2\pi(K_{\rm bound}-1)$.  This is a check in the model's QK label convention; comparison with the spin B2B literature additionally requires using the same canonical-total-$J$ convention for the angular-momentum label.
+where "signed" means the simultaneous transformation $(j,\chi_A,\chi_S)\to(-j,-\chi_A,-\chi_S)$.  The last condition fixes the infinity branch as $v_\infty=\pi/2+\text{signed-odd terms}$.  Therefore the nonconstant angular pieces cancel in the signed sum, and the remaining invariant is exactly $2\pi(K_{\rm bound}-1)$.  In this check, the QK angular momentum $L$ is identified with the canonical total angular momentum $J$ used in the B2B relation.
 
 ## Examples
 
