@@ -458,6 +458,69 @@ n_{\rm std}=(1-F_{vu})n_{vu},\qquad
 e_{t,{\rm std}}^2=(1-F_{vu})^2e_{t,vu}^2 .
 $$
 
+## Boundary-To-Bound Check
+
+Boundary-to-bound, or B2B, relates gauge-invariant scattering data for hyperbolic motion to gauge-invariant observables of bound motion.  The check included here is only the angular/periastron part of that dictionary.  It does not test the radial-action or time/frequency sectors.
+
+To avoid notation clashes, this section writes the scattering angle as $\chi_{\rm scat}$.  The spin variables remain $\chi_S$ and $\chi_A$.  The symbols used below are:
+
+```text
+E_n          conserved reduced energy label used by the QK models
+L            public conserved angular-momentum label used by the QK models
+j=1/L        signed large-angular-momentum expansion variable used in the check
+K            QK periastron-advance factor
+e_phi        QK angular eccentricity
+v_infty      hyperbolic angular anomaly at infinity
+f_phi, ...   QK angular harmonic coefficients
+```
+
+The B2B relation being checked is
+
+$$
+\Delta\Phi(E,J)=\chi_{\rm scat}(E,J)+\chi_{\rm scat}(E,-J),
+$$
+
+where $\Delta\Phi$ is the periastron excess.  In the QK notation this bound-side invariant is
+
+$$
+\Delta\Phi_{\rm bound}=2\pi(K_{\rm bound}-1),
+$$
+
+and the hyperbolic scattering angle is computed from the unbound angular QK form as
+
+$$
+\chi_{\rm scat}=2K_{\rm hyp}\left[v_\infty+f_\phi\sin(2v_\infty)+g_\phi\sin(3v_\infty)+h_\phi\sin(4v_\infty)+i_\phi\sin(5v_\infty)\right]-\pi .
+$$
+
+For the retained aligned-spin model, the signed B2B continuation used by the example is
+
+$$
+j\to -j,\qquad
+\chi_A\to-\chi_A,\qquad
+\chi_S\to-\chi_S,\qquad
+\delta^2=1-4\nu .
+$$
+
+The explicit residual verified by `examples/b2b_aligned_spin_3pn.wls` is
+
+$$
+{\cal R}_{\rm B2B}
+=\chi_{\rm scat}(E_n,j,\chi_A,\chi_S)
+ +\chi_{\rm scat}(E_n,-j,-\chi_A,-\chi_S)
+ -2\pi(K_{\rm bound}-1)=0
+$$
+
+through the implemented conservative content: nonspinning 0PN--3PN, spin-orbit 1.5PN and 2.5PN, and spin-spin 2PN and 3PN.  Algebraically, the script proves this by checking
+
+```text
+K_bound - K_unbound = 0 after delta^2 = 1 - 4 nu,
+K, fPhi, hPhi are signed-even,
+gPhi, iPhi are signed-odd,
+j^2 ePhi^2 is signed-even,
+```
+
+where "signed" means the simultaneous transformation $(j,\chi_A,\chi_S)\to(-j,-\chi_A,-\chi_S)$.  The last condition fixes the infinity branch as $v_\infty=\pi/2+\text{signed-odd terms}$.  Therefore the nonconstant angular pieces cancel in the signed sum, and the remaining invariant is exactly $2\pi(K_{\rm bound}-1)$.  This is a check in the model's QK label convention; comparison with the spin B2B literature additionally requires using the same canonical-total-$J$ convention for the angular-momentum label.
+
 ## Examples
 
 Command-line examples:
@@ -465,6 +528,7 @@ Command-line examples:
 ```powershell
 wolframscript -script .\qk-orbits-release\examples\minimal_unbound.wls
 wolframscript -script .\qk-orbits-release\examples\minimal_parabolic.wls
+wolframscript -script .\qk-orbits-release\examples\b2b_aligned_spin_3pn.wls
 wolframscript -script .\qk-orbits-release\examples\qk_vs_direct_three_orbits.wls
 ```
 
@@ -517,6 +581,8 @@ wolframscript -script .\qk-orbits-release\tests\test_direct_eom.wls
 
 - T. Damour and N. Deruelle, "General relativistic celestial mechanics of binary systems. I. The post-newtonian motion", [Numdam](https://www.numdam.org/item/AIHPA_1985__43_1_107_0/).
 - T. Damour and N. Deruelle, "General relativistic celestial mechanics of binary systems. II. The post-newtonian timing formula", [Numdam](https://www.numdam.org/item/AIHPA_1986__44_3_263_0/).
+- G. Kälin and R. A. Porto, "From Boundary Data to Bound States", [arXiv:1910.03008](https://arxiv.org/abs/1910.03008).
+- G. Kälin and R. A. Porto, "From Boundary Data to Bound States II: Scattering Angle to Dynamical Invariants (with Twist)", [arXiv:1911.09130](https://arxiv.org/abs/1911.09130).
 - L. Blanchet and B. R. Iyer, "Third post-Newtonian dynamics of compact binaries: equations of motion in the center-of-mass frame", [arXiv:gr-qc/0209089](https://arxiv.org/abs/gr-qc/0209089).
 - R.-M. Memmesheimer, A. Gopakumar, and G. Schaefer, "Third post-Newtonian accurate generalized quasi-Keplerian parametrization for compact binaries in eccentric orbits", [arXiv:gr-qc/0407049](https://arxiv.org/abs/gr-qc/0407049).
 - S. Marsat, A. Bohe, G. Faye, and L. Blanchet, "Next-to-next-to-leading order spin-orbit effects in the equations of motion of compact binary systems", [arXiv:1210.4143](https://arxiv.org/abs/1210.4143).
