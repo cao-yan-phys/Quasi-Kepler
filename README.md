@@ -561,11 +561,10 @@ The plotting helper accepts any association of orbit datasets, for example
 ```wl
 plotOrbit["unbound QK only", <|"QK" -> unboundQK|>]
 plotOrbit["unbound direct only", <|"direct EOM" -> unboundDirect|>]
-plotOrbit["unbound", <|"direct EOM" -> unboundDirect,
-  "QK" -> unboundQK|>]
+plotOrbit["unbound", <|"direct EOM" -> unboundDirect, "QK" -> unboundQK|>]
 ```
 
-In all example plots the red curve labelled `0PN QK` is the Newtonian QK trajectory generated from the same initial data.  It is a visual baseline, not a separate numerical integration.  In overlay plots the direct-EOM curve is drawn first and the black dashed QK curve second, so the QK line remains visible on top.
+In all example plots the red curve labelled `0PN QK` is the Newtonian trajectory generated from the same initial data.
 
 The editable notebook displays the full `QKParameters` association returned by `QKParameterValuesFromInitialData`.  The command-line example writes the same full association to each `*_qk_parameters.wl` file.
 
