@@ -353,7 +353,7 @@ s=\frac{1}{r},\qquad v_t=r\dot\phi=\frac{\dot\phi}{s},\qquad
 v^2=\dot r^2+v_t^2 .
 $$
 
-The direct integrator can optionally add the leading nonspinning 2.5PN radiation-reaction acceleration:
+The direct integrator can optionally add the leading 2.5PN radiation-reaction acceleration:
 
 ```wl
 "Include2p5PNRadiationReaction" -> True
