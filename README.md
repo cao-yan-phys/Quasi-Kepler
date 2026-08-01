@@ -1,6 +1,6 @@
 # QK Orbits
 
-Tools for conservative PN quasi-Keplerian (QK) orbits and direct polar-EOM evolution for aligned-spin compact binaries.
+Tools for conservative PN quasi-Keplerian (QK) orbits and direct polar-EOM evolution for aligned-spin compact binaries, with additional 3D numerical dynamics, osculating-element analysis, and center-of-mass reconstruction tools.
 
 <p align="center">
 <img src="docs/bound_extreme_spin_promo.png" alt="Bound extreme aligned-spin QK orbit" width="500">
@@ -9,7 +9,7 @@ Tools for conservative PN quasi-Keplerian (QK) orbits and direct polar-EOM evolu
 <p align="center"><sub>(input: <code>En=-1/2000</code>, <code>L=14</code>, <code>eps=1</code>, <code>nu=1/4</code>, <code>delta=0</code>, <code>chiS=1</code>, <code>chiA=0</code>, <code>kappaS=0</code>, <code>kappaA=0</code>, <code>SO=1</code>; QK parameters: <code>n=0.00003156045359033833</code>, <code>K=1.0146059311639184</code>, <code>a_r=998.4872255108467</code>, <code>e_r=0.8993053072175136</code>, <code>e_t=0.8961268723821495</code>, <code>e_phi=0.899420582549924</code>, <code>f_phi=0.000015046180398609838</code>, <code>g_phi=6.009778722053774e-8</code>, <code>h_phi=7.678475281627262e-9</code>, <code>i_phi=0</code>, <code>g_t=0.00001363334233196573</code>, <code>f_t=5.877786734211771e-7</code>, <code>h_t=-1.5045981436324583e-8</code>, <code>i_t=0</code>)</sub></p>
 
 
-The two public orbit generators have the same practical input shape:
+The aligned-spin QK and direct polar-EOM orbit generators have the same practical input shape:
 
 ```text
 primitive binary parameters
@@ -33,6 +33,20 @@ Parabolic3PNAlignedSpin  quasi-parabolic conservative QK orbit
 ```
 
 All three models use the same aligned-spin conservative content through 3PN: nonspinning 0PN--3PN, spin-orbit 1.5PN and 2.5PN, and spin-spin 2PN and 3PN.
+
+## Additional Functionality
+
+- `CMPositionsFromRelativeOrbit` in `src/CMPositions.wl` reconstructs the two individual center-of-mass-frame positions from a relative orbit through 3PN, with spin-orbit corrections and an optional 2.5PN radiation-reaction shift.
+
+- `Numerical3DOrbit` in `src/Numerical3DOrbits.wl` provides one entry point for the `"SpinningBinary3PN"` and `"WillEMRI"` numerical models and returns both Cartesian and spherical orbit data.
+
+- `SpinningBinary3PNOrbit` in `src/SpinningBinary3PNOrbits.wl` evolves a generic-spin comparable-mass binary in 3D with nonspinning terms through 3PN, spin-orbit terms through 2.5PN, spin-spin terms through 3PN, and leading spin-orbit precession.
+
+- `EMRI3DOrbit` in `src/EMRI3DOrbits.wl` evolves inclined test-body orbits with the Will--Maitra harmonic-coordinate Kerr EOM: conservative dynamics through 3PN and optional radiation reaction through 4.5PN.
+
+- `Osculating3DStateFromElements` and `Osculating3DElementsFromOrbit` in `src/OsculatingElements3D.wl` convert between 3D states and the bound, parabolic, or hyperbolic osculating elements defined in [arXiv:2411.03095](https://arxiv.org/abs/2411.03095); the module also implements the paper's analytic results.
+
+- `Scattering2024Compare` in `src/Scattering2024.wl` compares numerical hyperbolic encounters with the first-order analytic osculating-element changes in [arXiv:2411.03095](https://arxiv.org/abs/2411.03095) for 1PN, spin, quadrupole, and 2.5PN effects.
 
 ## Quick Start
 
@@ -530,6 +544,9 @@ Command-line examples:
 ```powershell
 wolframscript -script .\qk-orbits-release\examples\minimal_unbound.wls
 wolframscript -script .\qk-orbits-release\examples\minimal_parabolic.wls
+wolframscript -script .\qk-orbits-release\examples\minimal_cm_positions.wls
+wolframscript -script .\qk-orbits-release\examples\minimal_emri3d.wls
+wolframscript -script .\qk-orbits-release\examples\minimal_numerical3d.wls
 wolframscript -script .\qk-orbits-release\examples\b2b_aligned_spin_3pn.wls
 wolframscript -script .\qk-orbits-release\examples\qk_vs_direct_three_orbits.wls
 ```
@@ -590,3 +607,5 @@ wolframscript -script .\qk-orbits-release\tests\test_direct_eom.wls
 - A. Bohe, S. Marsat, G. Faye, and L. Blanchet, "Next-to-next-to-leading order spin-orbit effects in the near-zone metric and precession equations of compact binaries", [arXiv:1212.5520](https://arxiv.org/abs/1212.5520).
 - L. Blanchet, G. Faye, S. Marsat, and E. K. Porter, "Quadratic-in-spin effects in the orbital dynamics and gravitational-wave energy flux of compact binaries at the 3PN order", [arXiv:1501.01529](https://arxiv.org/abs/1501.01529).
 - Q. Henry and M. Khalil, "Spin effects in gravitational waveforms and fluxes for binaries on eccentric orbits to the third post-Newtonian order", [arXiv:2308.13606](https://arxiv.org/abs/2308.13606).
+- C. M. Will and M. Maitra, "Relativistic orbits around spinning supermassive black holes. Secular evolution to 4.5 post-Newtonian order", [arXiv:1611.06931](https://arxiv.org/abs/1611.06931).
+- Y.-Z. Cheng, Y. Cao, and Y. Tang, "Effects of black hole environments on extreme mass-ratio hyperbolic encounters", [arXiv:2411.03095](https://arxiv.org/abs/2411.03095).
