@@ -95,7 +95,11 @@ DirectEOMLoad[OptionsPattern[]] := Module[{root, file},
    Message[DirectEOMLoad::nofile, file];
    Return[$Failed];
    ];
-  Get[file] /. globalSymbolRules[]
+  Block[{Global`eps, Global`nu, Global`delta, Global`chi1, Global`chi2,
+    Global`kap1, Global`kap2, Global`s, Global`rd, Global`p, Global`vt,
+    Global`v2},
+   Get[file] /. globalSymbolRules[]
+   ]
   ];
 
 DirectEOMLoad::nofile = "Direct EOM file not found: `1`.";

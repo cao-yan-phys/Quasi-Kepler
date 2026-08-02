@@ -15,9 +15,6 @@ paramValue[params_Association, key_String, default_] :=
 
 massValue[params_Association] := paramValue[params, "M", 1];
 
-rotZ[a_] := {{Cos[a], -Sin[a], 0}, {Sin[a], Cos[a], 0}, {0, 0, 1}};
-rotX[a_] := {{1, 0, 0}, {0, Cos[a], -Sin[a]}, {0, Sin[a], Cos[a]}};
-
 sphericalBasis[theta_, phi_] := <|
    "er" -> {Sin[theta] Cos[phi], Sin[theta] Sin[phi], Cos[theta]},
    "etheta" -> {Cos[theta] Cos[phi], Cos[theta] Sin[phi], -Sin[theta]},
@@ -31,6 +28,69 @@ safeTheta[x_] := Module[{r = Norm[x], z},
   ];
 
 signedAngle[u_, v_, normal_] := ArcTan[u.v, normal.Cross[u, v]];
+wrapAngle[x_] := Arg[Exp[I*x]];
+
+paperOrbitalBasis[inc_, phi0_, varphi0_] := Module[
+  {aHat, bHat, pHat, qHat},
+  aHat = {Cos[inc]*Cos[phi0], Cos[inc]*Sin[phi0], Sin[inc]};
+  bHat = {-Sin[phi0], Cos[phi0], 0};
+  pHat = aHat*Cos[varphi0] + bHat*Sin[varphi0];
+  qHat = -aHat*Sin[varphi0] + bHat*Cos[varphi0];
+  <|"pHat" -> pHat, "qHat" -> qHat,
+   "LHat" -> Cross[pHat, qHat]|>
+  ];
+
+phaseFromTrueAnomaly[e_, p_, a_, f_, m_, orbitType_] := Module[
+  {cosu, sinu, u, mean, omega, ch, sh, xi, d, tau},
+  Switch[orbitType,
+   "Bound",
+   cosu = (e + Cos[f])/(1 + e*Cos[f]);
+   sinu = Sqrt[1 - e^2]*Sin[f]/(1 + e*Cos[f]);
+   u = ArcTan[cosu, sinu];
+   mean = u - e*Sin[u];
+   omega = Sqrt[m/a^3];
+   <|"anomaly" -> u, "eccentricAnomaly" -> u,
+    "meanAnomaly" -> mean, "phaseTime" -> mean/omega|>,
+   "Unbound",
+   ch = (e + Cos[f])/(1 + e*Cos[f]);
+   sh = Sqrt[e^2 - 1]*Sin[f]/(1 + e*Cos[f]);
+   xi = ArcSinh[sh];
+   mean = e*sh - xi;
+   omega = Sqrt[m/a^3];
+   <|"anomaly" -> xi, "hyperbolicAnomaly" -> xi,
+    "meanAnomaly" -> mean, "phaseTime" -> mean/omega|>,
+   "Parabolic",
+   d = Tan[f/2];
+   tau = Sqrt[p^3/m]*(d + d^3/3)/2;
+   <|"anomaly" -> d, "barkerVariable" -> d,
+    "meanAnomaly" -> Missing["NotApplicable"], "phaseTime" -> tau|>
+   ]
+  ];
+
+trueAnomalyFromTime[e_, p_, a_, time_, t0_, m_] := Module[
+  {omega, mean, u, xi, d, b, cosf, sinf},
+  Which[
+   e < 1,
+   omega = Sqrt[m/a^3];
+   mean = omega*(time - t0);
+   u = u /. Quiet[FindRoot[u - e*Sin[u] == mean, {u, mean}]];
+   cosf = (Cos[u] - e)/(1 - e*Cos[u]);
+   sinf = Sqrt[1 - e^2]*Sin[u]/(1 - e*Cos[u]);
+   ArcTan[cosf, sinf],
+   e > 1,
+   omega = Sqrt[m/a^3];
+   mean = omega*(time - t0);
+   xi = xi /. Quiet[FindRoot[e*Sinh[xi] - xi == mean,
+       {xi, ArcSinh[mean/e]}]];
+   cosf = (e - Cosh[xi])/(e*Cosh[xi] - 1);
+   sinf = Sqrt[e^2 - 1]*Sinh[xi]/(e*Cosh[xi] - 1);
+   ArcTan[cosf, sinf],
+   True,
+   b = 2*(time - t0)/Sqrt[p^3/m];
+   d = 2*Sinh[ArcSinh[3*b/2]/3];
+   2*ArcTan[d]
+   ]
+  ];
 
 Osculating3DStateFromSpherical[initialData_Association] := Module[
   {required, missing, r, theta, phi, rd, thetad, phid, basis, x, v},
@@ -67,8 +127,8 @@ Osculating3DSphericalFromState[x_List, v_List] := Module[
 
 Osculating3DStateFromElements[elements_Association,
   params_Association : <||>] := Module[
-  {m, e, inc, omega, phi0, omegaNode, f, p, a, r, h, rd, vt, xpf,
-   vpf, rot},
+  {m, e, inc, omega, phi0, f, p, a, r, h, rd, vt, xpf,
+   vpf, basis, time, t0},
   m = massValue[params];
   If[! KeyExistsQ[elements, "e"],
    Message[Osculating3DStateFromElements::missing, {"e"}];
@@ -79,9 +139,6 @@ Osculating3DStateFromElements[elements_Association,
   omega = paramValue[elements, "varphi0",
     paramValue[elements, "omega", 0]];
   phi0 = paramValue[elements, "phi0", Pi/2];
-  omegaNode = paramValue[elements, "Omega", phi0 - Pi/2];
-  f = paramValue[elements, "varphi",
-    paramValue[elements, "trueAnomaly", 0]];
   p = If[KeyExistsQ[elements, "p"],
     elements["p"],
     If[KeyExistsQ[elements, "a"],
@@ -92,20 +149,31 @@ Osculating3DStateFromElements[elements_Association,
      Return[$Failed]
      ]
     ];
+  a = Which[e < 1, p/(1 - e^2), e > 1, p/(e^2 - 1), True, Infinity];
+  f = Which[
+    KeyExistsQ[elements, "varphi"], elements["varphi"],
+    KeyExistsQ[elements, "trueAnomaly"], elements["trueAnomaly"],
+    KeyExistsQ[elements, "t"] && KeyExistsQ[elements, "t0"],
+    time = elements["t"];
+    t0 = elements["t0"];
+    trueAnomalyFromTime[e, p, a, time, t0, m],
+    True, 0
+    ];
   r = p/(1 + e*Cos[f]);
   h = Sqrt[m*p];
   rd = (m/h)*e*Sin[f];
   vt = h/r;
-  xpf = r*{Cos[f], Sin[f], 0};
-  vpf = {rd*Cos[f] - vt*Sin[f], rd*Sin[f] + vt*Cos[f], 0};
-  rot = rotZ[omegaNode].rotX[inc].rotZ[omega];
-  <|"x" -> rot.xpf, "v" -> rot.vpf|>
+  basis = paperOrbitalBasis[inc, phi0, omega];
+  xpf = r*(Cos[f]*basis["pHat"] + Sin[f]*basis["qHat"]);
+  vpf = rd*(Cos[f]*basis["pHat"] + Sin[f]*basis["qHat"]) +
+    vt*(-Sin[f]*basis["pHat"] + Cos[f]*basis["qHat"]);
+  <|"x" -> xpf, "v" -> vpf|>
   ];
 
-Osculating3DElementsFromState[x_List, v_List,
+osculatingElementsFromState[x_List, v_List, time_,
   params_Association : <||>] := Module[
   {m, zhat, r, v2, energy, hvec, h, hhat, nvec, nnorm, evec, ecc,
-   p, a, inc, omegaNode, phi0, omega, f, orbitType, tol},
+   p, a, inc, omegaNode, phi0, omega, f, orbitType, tol, phase, t0},
   m = massValue[params];
   zhat = {0, 0, 1};
   tol = 10^-12;
@@ -130,18 +198,31 @@ Osculating3DElementsFromState[x_List, v_List,
   omegaNode = If[nnorm > tol, ArcTan[nvec[[1]], nvec[[2]]], 0];
   phi0 = omegaNode + Pi/2;
   omega = If[nnorm > tol && ecc > tol,
-    signedAngle[nvec/nnorm, evec/ecc, hhat],
+    wrapAngle[signedAngle[nvec/nnorm, evec/ecc, hhat] - Pi/2],
     0
     ];
   f = If[ecc > tol,
     signedAngle[evec/ecc, x/r, hhat],
     If[nnorm > tol, signedAngle[nvec/nnorm, x/r, hhat], 0]
-    ];
+     ];
+  phase = phaseFromTrueAnomaly[ecc, p, a, f, m, orbitType];
+  t0 = If[MissingQ[time], Missing["TimeNotProvided"],
+    time - phase["phaseTime"]];
   <|"orbitType" -> orbitType, "a" -> a, "e" -> ecc, "p" -> p,
-   "i" -> inc, "Omega" -> omegaNode, "phi0" -> phi0,
-   "varphi0" -> omega, "varphi" -> f, "energy" -> energy,
-   "h" -> h, "hVector" -> hvec, "eVector" -> evec|>
+    "i" -> inc, "Omega" -> omegaNode, "phi0" -> phi0,
+    "varphi0" -> omega, "t0" -> t0, "varphi" -> f,
+    "anomaly" -> phase["anomaly"],
+    "meanAnomaly" -> phase["meanAnomaly"], "energy" -> energy,
+    "h" -> h, "hVector" -> hvec, "eVector" -> evec|>
   ];
+
+Osculating3DElementsFromState[x_List, v_List,
+  params_Association : <||>] :=
+ osculatingElementsFromState[x, v, Missing["TimeNotProvided"], params];
+
+Osculating3DElementsFromState[x_List, v_List, time_?NumericQ,
+  params_Association : <||>] :=
+ osculatingElementsFromState[x, v, time, params];
 
 stateFromOrbitPoint[orbit_Association, index_Integer] := Module[
   {state},
@@ -172,7 +253,9 @@ Osculating3DElementsFromOrbit[orbit_Association,
   states = stateFromOrbitPoint[orbit, #] & /@ Range[npts];
   MapThread[
    Join[If[KeyExistsQ[orbit, "t"], <|"t" -> #1|>, <||>],
-     Osculating3DElementsFromState[#2["x"], #2["v"], params]] &,
+     If[MissingQ[#1],
+      Osculating3DElementsFromState[#2["x"], #2["v"], params],
+      Osculating3DElementsFromState[#2["x"], #2["v"], #1, params]]] &,
    {If[KeyExistsQ[orbit, "t"], orbit["t"], ConstantArray[Missing["t"], npts]],
     states}]
   ];
@@ -198,7 +281,7 @@ Osculating3DHyperbolicGaussianRates[elements_Association, force_,
   params_Association : <||>] := Module[
   {m, a, e, inc, phi0, varphi0, varphi, omegaK, b, r, ch, sh, xi,
    comps, fr, fv, fz, phidot0, idot, varphi0dot, adot, edot,
-   mdot, varphidot},
+   mdot, varphidot, mean, t0dot},
   m = massValue[params];
   If[! And @@ (KeyExistsQ[elements, #] & /@ {"a", "e", "i", "phi0",
         "varphi0", "varphi"}),
@@ -238,11 +321,14 @@ Osculating3DHyperbolicGaussianRates[elements_Association, force_,
     Cos[inc]*phidot0;
   mdot = omegaK +
     (1 - e*ch)*(a*ch*edot - (1 - e*ch)*adot)/(a*e*sh) +
-    sh*edot;
+     sh*edot;
+  mean = e*sh - xi;
+  t0dot = 1 - mdot/omegaK - (3/2)*(adot/a)*mean/omegaK;
   varphidot = a^2*omegaK*Sqrt[e^2 - 1]/r^2 -
     (varphi0dot + Cos[inc]*phidot0);
   <|"adot" -> adot, "edot" -> edot, "varphi0dot" -> varphi0dot,
-   "phi0dot" -> phidot0, "idot" -> idot, "Mdot" -> mdot,
+    "phi0dot" -> phidot0, "idot" -> idot, "t0dot" -> t0dot,
+    "Mdot" -> mdot,
    "varphidot" -> varphidot, "Fr" -> fr, "Fvarphi" -> fv,
    "FZ" -> fz, "xi" -> xi|>
   ];

@@ -44,9 +44,11 @@ All three models use the same aligned-spin conservative content through 3PN: non
 
 - `EMRI3DOrbit` in `src/EMRI3DOrbits.wl` evolves inclined test-body orbits with the Will--Maitra harmonic-coordinate Kerr EOM: conservative dynamics through 3PN and optional radiation reaction through 4.5PN.
 
-- `Osculating3DStateFromElements` and `Osculating3DElementsFromOrbit` in `src/OsculatingElements3D.wl` convert between 3D states and the bound, parabolic, or hyperbolic osculating elements defined in [arXiv:2411.03095](https://arxiv.org/abs/2411.03095); the module also implements the paper's analytic results.
+- `Osculating3DStateFromElements` and `Osculating3DElementsFromOrbit` in `src/OsculatingElements3D.wl` convert between 3D states and the six Keplerian elliptical, parabolic, or hyperbolic osculating elements $(a,e,i,\phi_0,\varphi_0,t_0)$ defined in [arXiv:2411.03095](https://arxiv.org/abs/2411.03095), together with the instantaneous true anomaly $\varphi$.
 
-- `Scattering2024Compare` in `src/Scattering2024.wl` compares numerical hyperbolic encounters with the first-order analytic osculating-element changes in [arXiv:2411.03095](https://arxiv.org/abs/2411.03095) for 1PN, spin, quadrupole, and 2.5PN effects.
+- `Scattering2024Compare` in `src/Scattering2024.wl` compares numerical hyperbolic encounters with the first-order analytic osculating-element changes in [arXiv:2411.03095](https://arxiv.org/abs/2411.03095) for 1PN, 1.5PN SO, quadrupole, and 2.5PN effects.
+
+- `SpinOrbitScattering1p5PN` in `src/SpinOrbitScattering1p5PN.wl` implements a closed, exact-in-eccentricity 1.5PN spin-orbit scattering result for arbitrary mass ratio and two arbitrary incoming spin directions, returning the changes of the angular-momentum and eccentricity vectors, the outgoing velocity direction, the axial velocity-scattering vector, and the complete orbital-frame rotation.  Let $X_A=m_A/M$, $\delta=X_1-X_2$, $\vec S=\vec S_1+\vec S_2$, and $\vec\Sigma=\vec S_2/X_2-\vec S_1/X_1$.  For the Newtonian hyperbola, use the periastron basis $(\hat p,\hat q,\hat L)$ and define $p=a(e^2-1)$, $h=\sqrt{Mp}$, $\rho=\sqrt{e^2-1}$, $F=\arccos(-1/e)$, $S_\alpha=\vec S\cdot\hat\alpha$, $\Sigma_\alpha=\vec\Sigma\cdot\hat\alpha$ for $\alpha\in\{p,q,L\}$, $A=F+\rho/e^2$, $B=2\rho^3/(3e^3)$, $C=A+eB$, $D=F-\rho/e^2+2\rho-2\rho^3/(3e^2)$, and $Q=2eF+2e\rho-2\rho^3/(3e)$.  The closed vector changes are $\Delta\vec h=(\epsilon^3/p)\{[2eB S_q+C(7S_q+3\delta\Sigma_q)]\hat p+[2eB S_p-D(7S_p+3\delta\Sigma_p)]\hat q\}$ and $\Delta\vec e=(\epsilon^3/(hp))\{[-4eA S_L-2e^2B S_L-Q(5S_L+3\delta\Sigma_L)]\hat q-[2e^2B S_q+eC(7S_q+3\delta\Sigma_q)]\hat L\}$.  Here $\epsilon$ is the PN bookkeeping parameter and is set to one physically; at this order $\Delta a=\Delta e=0$, so the scalar eccentricity is unchanged although the direction of $\vec e$ can change.  The outgoing correction follows from $\delta\hat L=\Delta\vec h/h$, $\delta\hat p=\Delta\vec e/e$, $\delta\hat q=\delta\hat L\times\hat p+\hat L\times\delta\hat p$, $\hat k_{\rm in}=(\hat p+\rho\hat q)/e$, $\hat k_{\rm out}^{\rm N}=(-\hat p+\rho\hat q)/e$, and $\delta\hat k_{\rm out}=-\delta\hat p/e+(\rho/e)\delta\hat q$.  Finally, `ScatteringVector` is $\vec\chi=\mathrm{atan2}(|\hat k_{\rm in}\times\hat k_{\rm out}|,\hat k_{\rm in}\cdot\hat k_{\rm out})(\hat k_{\rm in}\times\hat k_{\rm out})/|\hat k_{\rm in}\times\hat k_{\rm out}|$; its magnitude is the three-dimensional velocity deflection angle.  The closed result has also been tested against direct numerical integration of the EOM.
 
 ## Quick Start
 
@@ -547,6 +549,7 @@ wolframscript -script .\qk-orbits-release\examples\minimal_parabolic.wls
 wolframscript -script .\qk-orbits-release\examples\minimal_cm_positions.wls
 wolframscript -script .\qk-orbits-release\examples\minimal_emri3d.wls
 wolframscript -script .\qk-orbits-release\examples\minimal_numerical3d.wls
+wolframscript -script .\qk-orbits-release\examples\minimal_spin_orbit_scattering_1p5pn.wls
 wolframscript -script .\qk-orbits-release\examples\b2b_aligned_spin_3pn.wls
 wolframscript -script .\qk-orbits-release\examples\qk_vs_direct_three_orbits.wls
 ```
@@ -608,4 +611,3 @@ wolframscript -script .\qk-orbits-release\tests\test_direct_eom.wls
 - L. Blanchet, G. Faye, S. Marsat, and E. K. Porter, "Quadratic-in-spin effects in the orbital dynamics and gravitational-wave energy flux of compact binaries at the 3PN order", [arXiv:1501.01529](https://arxiv.org/abs/1501.01529).
 - Q. Henry and M. Khalil, "Spin effects in gravitational waveforms and fluxes for binaries on eccentric orbits to the third post-Newtonian order", [arXiv:2308.13606](https://arxiv.org/abs/2308.13606).
 - C. M. Will and M. Maitra, "Relativistic orbits around spinning supermassive black holes. Secular evolution to 4.5 post-Newtonian order", [arXiv:1611.06931](https://arxiv.org/abs/1611.06931).
-- Y.-Z. Cheng, Y. Cao, and Y. Tang, "Effects of black hole environments on extreme mass-ratio hyperbolic encounters", [arXiv:2411.03095](https://arxiv.org/abs/2411.03095).
