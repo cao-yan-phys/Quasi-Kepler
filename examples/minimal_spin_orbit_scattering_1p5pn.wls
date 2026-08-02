@@ -14,4 +14,5 @@ result = SpinOrbitScattering1p5PN[elements, params];
 
 Print[KeyTake[result, {"DeltaHVector", "DeltaEVector", "KIn", "KOut",
     "ScatteringAngle", "ScatteringVector", "FrameRotationVector",
+    "SpinRotationAngles", "SpinRotationVectors", "FinalSpinVectorsLinear",
     "DeltaElements"}]];

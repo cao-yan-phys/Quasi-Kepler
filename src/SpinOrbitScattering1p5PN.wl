@@ -84,12 +84,14 @@ frameRotationVector[rotation_?MatrixQ] := Module[{log},
 
 SpinOrbitScattering1p5PN[elements_Association,
   params_Association : <||>] := Module[
-  {required, missing, mass, eps, fractions, delta, spins, svec, sigma,
+  {required, missing, mass, eps, fractions, delta, x1, x2, spins, svec, sigma,
    a, e, p, h, basis, pHat, qHat, lHat, ints, rho, fInf, is2, is2c,
    i2, i3, icPoly, sp, sq, sl, sigp, sigq, sigl, dhp, dhq, deq,
    del, deltaH, deltaE, deltaLHat, deltaPHat, deltaQHat, hOutHat,
    pOutHat, qOutHat, kIn, kOut0, deltaKOut, kOut, bIn, bOut,
    frameIn, frameOut, rotation, frameVector, chiVector, chiAngle, chiNewton,
+   spinCoefficient1, spinCoefficient2, spinAngle1, spinAngle2,
+   spinRotationVector1, spinRotationVector2, deltaSpin1, deltaSpin2,
    inc, omegaNode, nodeDirection, iDirection, deltaI, deltaPhi0,
    deltaVarphi0},
 
@@ -112,6 +114,7 @@ SpinOrbitScattering1p5PN[elements_Association,
    Return[$Failed]
    ];
   delta = fractions["delta"];
+  {x1, x2} = Lookup[fractions, {"X1", "X2"}];
   spins = spinVectors[params, fractions, mass];
   {svec, sigma} = Lookup[spins, {"S", "Sigma"}];
 
@@ -159,6 +162,15 @@ SpinOrbitScattering1p5PN[elements_Association,
   chiAngle = Norm[chiVector];
   chiNewton = 2*ArcSin[1/e];
 
+  spinCoefficient1 = 2 + 3*x2/(2*x1);
+  spinCoefficient2 = 2 + 3*x1/(2*x2);
+  spinAngle1 = 2*eps^2*spinCoefficient1*(fInf + rho)/p;
+  spinAngle2 = 2*eps^2*spinCoefficient2*(fInf + rho)/p;
+  spinRotationVector1 = spinAngle1*lHat;
+  spinRotationVector2 = spinAngle2*lHat;
+  deltaSpin1 = Cross[spinRotationVector1, spins["S1"]];
+  deltaSpin2 = Cross[spinRotationVector2, spins["S2"]];
+
   omegaNode = elements["phi0"] - Pi/2;
   nodeDirection = {Cos[omegaNode], Sin[omegaNode], 0};
   iDirection = Normalize[Cross[nodeDirection, lHat]];
@@ -186,6 +198,15 @@ SpinOrbitScattering1p5PN[elements_Association,
    "FrameRotationMatrix" -> rotation,
    "FrameRotationVector" -> frameVector,
    "FinalBasisLinear" -> {pOutHat, qOutHat, hOutHat},
+   "SpinRotationAxis" -> lHat,
+   "SpinRotationAngles" -> <|"S1" -> spinAngle1,
+     "S2" -> spinAngle2|>,
+   "SpinRotationVectors" -> <|"S1" -> spinRotationVector1,
+     "S2" -> spinRotationVector2|>,
+   "DeltaSpinVectors" -> <|"S1" -> deltaSpin1,
+     "S2" -> deltaSpin2|>,
+   "FinalSpinVectorsLinear" -> <|"S1" -> spins["S1"] + deltaSpin1,
+     "S2" -> spins["S2"] + deltaSpin2|>,
    "DeltaElements" -> <|"Deltaa" -> 0, "Deltae" -> 0,
      "Deltai" -> deltaI, "Deltaphi0" -> deltaPhi0,
      "Deltavarphi0" -> deltaVarphi0|>|>
