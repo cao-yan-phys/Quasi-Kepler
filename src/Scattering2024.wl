@@ -8,6 +8,7 @@ Scattering2024ElementsFromState;
 Scattering2024AnalyticDeltas;
 Scattering2024NumericalEncounter;
 Scattering2024Compare;
+
 Begin["`Private`"];
 
 Options[Scattering2024NumericalEncounter] = {

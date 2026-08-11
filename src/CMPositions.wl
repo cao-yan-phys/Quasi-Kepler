@@ -4,6 +4,7 @@ BeginPackage["CMPositions`"];
 
 CMPositionsFromRelativeOrbit;
 CMPositionsAllowedPNOrders;
+
 Begin["`Private`"];
 
 Options[CMPositionsFromRelativeOrbit] = {"PNOrder" -> 3, "R0Prime" -> 1,

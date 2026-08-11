@@ -4,6 +4,7 @@ BeginPackage["Numerical3DOrbits`"];
 
 Numerical3DOrbit;
 Numerical3DAllowedModels;
+
 Begin["`Private`"];
 
 If[! NameQ["EMRI3DOrbits`EMRI3DOrbit"],

@@ -6,6 +6,7 @@ SpinningBinary3PNLoad;
 SpinningBinary3PNAllowedPNOrders;
 SpinningBinary3PNAcceleration;
 SpinningBinary3PNOrbit;
+
 Begin["`Private`"];
 
 $SpinningBinary3PNRoot = If[StringQ[$InputFileName] && $InputFileName =!= "",

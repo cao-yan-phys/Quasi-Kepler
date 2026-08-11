@@ -4,6 +4,7 @@ BeginPackage["SpinOrbitScattering1p5PN`"];
 
 SpinOrbitScattering1p5PN;
 VelocityScatteringVector;
+
 Begin["`Private`"];
 
 paramValue[params_Association, key_String, default_] := Lookup[params, key, default];

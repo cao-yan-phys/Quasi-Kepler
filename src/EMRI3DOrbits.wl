@@ -11,6 +11,7 @@ EMRI3DStateFromOsculatingElements;
 EMRI3DOsculatingElementsFromState;
 EMRI3DOsculatingElements;
 EMRI3DHyperbolicGaussianRates;
+
 Begin["`Private`"];
 
 Options[EMRI3DAcceleration] = {"PNOrder" -> 3,

@@ -42,7 +42,7 @@ All three models use the same aligned-spin conservative content through 3PN: non
 
 - `SpinningBinary3PNOrbit` in `src/SpinningBinary3PNOrbits.wl` evolves a generic-spin binary in 3D with nonspinning terms through 3PN, spin-orbit terms through 2.5PN, spin-spin terms through 3PN, and leading spin-orbit precession of both spins.
 
-- `EMRI3DOrbit` in `src/EMRI3DOrbits.wl` evolves inclined orbits of a nonspinning test body around a spinning massive black hole with the Will--Maitra harmonic-coordinate Kerr EOM: conservative dynamics through 3PN and optional radiation reaction through 4.5PN.
+- `EMRI3DOrbit` in `src/EMRI3DOrbits.wl` evolves inclined orbits of a nonspinning test body around a spinning massive black hole with the Will--Maitra harmonic-coordinate EOM: conservative dynamics through 3PN, spin-independent radiation reaction at 2.5PN, 3.5PN, and 4.5PN, and spin-orbit radiation reaction at 4PN.
 
 - `Osculating3DStateFromElements` and `Osculating3DElementsFromOrbit` in `src/OsculatingElements3D.wl` convert between 3D states and a common Keplerian osculating-conic parameterization: elliptical for $0\le e<1$, parabolic for $e=1$, and hyperbolic for $e>1$.  The interface uses the six elements $(a,e,i,\phi_0,\varphi_0,t_0)$ defined in [arXiv:2411.03095](https://arxiv.org/abs/2411.03095), together with the instantaneous true anomaly $\varphi$; on the parabolic branch, the semilatus rectum $p$ replaces the degenerate $a$.
 

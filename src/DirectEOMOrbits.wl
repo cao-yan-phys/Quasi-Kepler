@@ -5,6 +5,7 @@ BeginPackage["DirectEOMOrbits`"];
 DirectEOMLoad;
 DirectEOMOrbit;
 DirectEOMAllowedPNOrders;
+
 Begin["`Private`"];
 
 $DirectEOMOrbitsRoot = If[StringQ[$InputFileName] && $InputFileName =!= "",
