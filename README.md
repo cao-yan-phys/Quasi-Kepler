@@ -134,11 +134,7 @@ DirectEOMAllowedPNOrders[]
 
 $$
 0{\rm PN}\sim \epsilon^0,\quad
-1{\rm PN}\sim \epsilon^2,\quad
-1.5{\rm PN}\sim \epsilon^3,\quad
-2{\rm PN}\sim \epsilon^4,\quad
-2.5{\rm PN}\sim \epsilon^5,\quad
-3{\rm PN}\sim \epsilon^6 .
+\frac{n}{2}{\rm PN}\sim \epsilon^{n}.
 $$
 
 Use `eps -> 1` for the physical PN series.  This is the default used by the examples.  Smaller values are bookkeeping diagnostics only; do not use them for a physical orbit.
@@ -369,14 +365,14 @@ s=\frac{1}{r},\qquad v_t=r\dot\phi=\frac{\dot\phi}{s},\qquad
 v^2=\dot r^2+v_t^2 .
 $$
 
-The direct integrator can optionally add the nonspinning harmonic-coordinate radiation-reaction acceleration at 2.5PN and 3.5PN:
+The direct integrator can optionally add the harmonic-coordinate radiation-reaction terms at 2.5PN and 3.5PN:
 
 ```wl
 "Include2p5PNRadiationReaction" -> True,
 "Include3p5PNRadiationReaction" -> True
 ```
 
-Both switches are off by default and are independent of the conservative `PNOrder` setting; a physical radiation-reaction truncation through 3.5PN normally enables both.
+Both switches are off by default and are independent of the conservative `PNOrder` setting.  To include radiation reaction through 3.5PN, enable both.
 
 With either switch enabled, the direct EOM is dissipative and is not expected to coincide with the conservative QK trajectory.
 
@@ -390,23 +386,6 @@ MaxStepSize -> 1/2
 ```
 
 are intentionally not the interactive defaults; they are useful for regression checks, but they make the numerical orbit generator much slower.
-
-The implemented harmonic-gauge terms are
-
-$$
-A_{2.5{\rm PN}}=\epsilon^5\frac{8\nu}{5}s\dot r
-\left(\frac{17}{3}s-3v^2\right),
-$$
-
-$$
-B_{2.5{\rm PN}}=\epsilon^5\frac{8\nu}{5}s(3s+v^2),
-$$
-
-$$
-\ddot r_{\rm RR}=-s^2(A_{2.5{\rm PN}}+B_{2.5{\rm PN}}\dot r),
-\qquad
-\ddot\phi_{\rm RR}=-s^3B_{2.5{\rm PN}}v_t .
-$$
 
 ## Bound-Unbound Mapping
 
