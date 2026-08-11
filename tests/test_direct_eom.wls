@@ -5,6 +5,7 @@ ClearAll["Global`*"];
 root = DirectoryName[DirectoryName[$InputFileName]];
 Get[FileNameJoin[{root, "src", "QKOrbits.wl"}]];
 Get[FileNameJoin[{root, "src", "DirectEOMOrbits.wl"}]];
+Get[FileNameJoin[{root, "src", "EMRI3DOrbits.wl"}]];
 
 eom = DirectEOMLoad["RootDirectory" -> root];
 
@@ -81,18 +82,61 @@ rrIC = <|"r" -> 30, "phi" -> 0, "rdot" -> 0,
 rrOff = DirectEOMOrbit[eom, rrPrimitive, rrIC, rrTimes,
    WorkingPrecision -> wp, AccuracyGoal -> acc, PrecisionGoal -> prec,
    "PNOrder" -> 2.5, MaxStepSize -> 1/2];
-rrOn = DirectEOMOrbit[eom, rrPrimitive, rrIC, rrTimes,
+rr25On = DirectEOMOrbit[eom, rrPrimitive, rrIC, rrTimes,
    WorkingPrecision -> wp, AccuracyGoal -> acc, PrecisionGoal -> prec,
    "PNOrder" -> 2.5, MaxStepSize -> 1/2,
    "Include2p5PNRadiationReaction" -> True];
 
-rrDeltaR = Last[rrOn["r"]] - Last[rrOff["r"]];
-rrDeltaPhi = Last[rrOn["phi"]] - Last[rrOff["phi"]];
+rrDeltaR = Last[rr25On["r"]] - Last[rrOff["r"]];
+rrDeltaPhi = Last[rr25On["phi"]] - Last[rrOff["phi"]];
 Print["2.5PN radiation reaction switch: delta r=", N[rrDeltaR, 10],
  ", delta phi=", N[rrDeltaPhi, 10]];
 
 If[Abs[rrDeltaR] < 10^-6 || Abs[rrDeltaPhi] < 10^-7,
  Print["2.5PN radiation-reaction option appears inactive."];
+ Quit[2]];
+
+rr35On = DirectEOMOrbit[eom, rrPrimitive, rrIC, rrTimes,
+   WorkingPrecision -> wp, AccuracyGoal -> acc, PrecisionGoal -> prec,
+   "PNOrder" -> 2.5, MaxStepSize -> 1/2,
+   "Include2p5PNRadiationReaction" -> True,
+   "Include3p5PNRadiationReaction" -> True];
+
+rr35DeltaR = Last[rr35On["r"]] - Last[rr25On["r"]];
+rr35DeltaPhi = Last[rr35On["phi"]] - Last[rr25On["phi"]];
+Print["3.5PN radiation reaction switch: delta r=", N[rr35DeltaR, 10],
+ ", delta phi=", N[rr35DeltaPhi, 10]];
+
+If[Abs[rr35DeltaR] < 10^-9 || Abs[rr35DeltaPhi] < 10^-10,
+ Print["3.5PN radiation-reaction option appears inactive."];
+ Quit[2]];
+
+rr35Expr = DirectEOMOrbits`Private`radiationReaction35Polar[];
+rr35TestBody = Map[
+    Coefficient[#, DirectEOMOrbits`Private`nu, 1] &,
+    rr35Expr] /. {
+    DirectEOMOrbits`Private`eps -> 1,
+    DirectEOMOrbits`Private`s -> 1/37,
+    DirectEOMOrbits`Private`rd -> 1/50,
+    DirectEOMOrbits`Private`p -> 3/1000
+    };
+rr35EMRI = EMRI3DAcceleration[
+     {37, 0, 0}, {1/50, 111/1000, 0},
+     <|"M" -> 1, "eta" -> 1, "chi" -> 0, "eps" -> 1|>,
+     "PNOrder" -> 3.5, "IncludeRadiationReaction" -> True] -
+   EMRI3DAcceleration[
+     {37, 0, 0}, {1/50, 111/1000, 0},
+     <|"M" -> 1, "eta" -> 1, "chi" -> 0, "eps" -> 1|>,
+     "PNOrder" -> 3, "IncludeRadiationReaction" -> True];
+rr35TestBodyDelta = N[{
+    rr35TestBody["rddot"] - rr35EMRI[[1]],
+    rr35TestBody["phiddot"] - rr35EMRI[[2]]/37
+    }, 20];
+Print["3.5PN test-body-limit component differences: ",
+ N[rr35TestBodyDelta, 10]];
+
+If[Max[Abs[rr35TestBodyDelta]] > 10^-16,
+ Print["3.5PN radiation reaction disagrees with the EMRI test-body limit."];
  Quit[2]];
 
 Print["Direct EOM tests completed."];

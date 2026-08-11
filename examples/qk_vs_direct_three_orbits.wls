@@ -18,6 +18,7 @@ If[DirectoryQ[outDir], DeleteDirectory[outDir, DeleteContents -> True]];
 CreateDirectory[outDir, CreateIntermediateDirectories -> True];
 
 includeRR25 = False;
+includeRR35 = False;
 parabolicVelocitySign = 1;
 pnOrder = 3;
 allowedPNOrders = QKAllowedPNOrders[];
@@ -96,7 +97,8 @@ runCase[name_String] := Module[
     WorkingPrecision -> directWP, AccuracyGoal -> directAcc,
     PrecisionGoal -> directPrec,
     "PNOrder" -> pnOrder, MaxStepSize -> directMaxStepSize,
-    "Include2p5PNRadiationReaction" -> includeRR25];
+    "Include2p5PNRadiationReaction" -> includeRR25,
+    "Include3p5PNRadiationReaction" -> includeRR35];
   <|"qk0" -> qk0, "qk" -> qk, "direct" -> direct, "inputData" -> inputIC,
    "initialData" -> completeIC,
    "qkInfo" -> publicQKInfo[spec["model"], qkInfo]|>
@@ -165,7 +167,12 @@ orbitFigure[name_String, orbits_Association] := Legended[
     Below]
    ];
 
-directLabel = If[includeRR25, "direct EOM + 2.5PN RR", "direct EOM"];
+directLabel = Which[
+   includeRR25 && includeRR35, "direct EOM + 2.5PN/3.5PN RR",
+   includeRR35, "direct EOM + 3.5PN RR",
+   includeRR25, "direct EOM + 2.5PN RR",
+   True, "direct EOM"
+   ];
 
 overlayFigures = AssociationMap[
    orbitFigure[#, <|"0PN QK" -> results[#, "qk0"],
@@ -208,6 +215,7 @@ Do[
 shortAssoc[a_Association] := AssociationMap[N[#, 16] &, a];
 
 Put[<|"include2p5PNRadiationReaction" -> includeRR25,
+   "include3p5PNRadiationReaction" -> includeRR35,
    "pnOrder" -> pnOrder,
    "allowedPNOrders" -> allowedPNOrders,
    "parabolicVelocitySign" -> parabolicVelocitySign,

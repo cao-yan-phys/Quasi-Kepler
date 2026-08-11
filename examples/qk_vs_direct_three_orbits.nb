@@ -139,7 +139,9 @@ Cell[BoxData[
      RowBox[{"\"\<PNOrder\>\"", "\[Rule]", "pnOrder"}], ",", 
      RowBox[{"MaxStepSize", "\[Rule]", "directMaxStepSize"}], ",", 
      RowBox[{
-     "\"\<Include2p5PNRadiationReaction\>\"", "\[Rule]", "includeRR25"}]}], 
+     "\"\<Include2p5PNRadiationReaction\>\"", "\[Rule]", "includeRR25"}], ",",
+     RowBox[{
+     "\"\<Include3p5PNRadiationReaction\>\"", "\[Rule]", "includeRR35"}]}],
     "]"}]}], ";", 
   RowBox[{
    RowBox[{"orbitRows", "[", "orbit_Association", "]"}], ":=", 
@@ -196,10 +198,13 @@ Cell[BoxData[
     "]"}]}], ";", 
   RowBox[{
    RowBox[{"directLabel", "[", "]"}], ":=", 
-   RowBox[{"If", "[", 
+   RowBox[{"Which", "[",
     RowBox[{
-    "includeRR25", ",", "\"\<direct EOM + 2.5PN RR\>\"", ",", 
-     "\"\<direct EOM\>\""}], "]"}]}], ";", 
+     RowBox[{"includeRR25", "&&", "includeRR35"}], ",",
+     "\"\<direct EOM + 2.5PN/3.5PN RR\>\"", ",",
+     "includeRR35", ",", "\"\<direct EOM + 3.5PN RR\>\"", ",",
+     "includeRR25", ",", "\"\<direct EOM + 2.5PN RR\>\"", ",",
+     "True", ",", "\"\<direct EOM\>\""}], "]"}]}], ";",
   RowBox[{
    RowBox[{"shortValue", "[", "x_", "]"}], ":=", 
    RowBox[{"If", "[", 
@@ -489,6 +494,7 @@ Cell["\<\
 PNOrder must be one of allowedPNOrders. Use eps -> 1 for physical orbits; \
 smaller eps values are bookkeeping diagnostics only and are not the PN \
 truncation switch. includeRR25 affects only the direct EOM trajectory. \
+includeRR35 independently adds the 3.5PN radiation-reaction correction. \
 parabolicVelocitySign chooses the sign of the missing parabolic velocity. \
 directWP, directAccGoal, directPrecGoal, and directMaxStepSize control only \
 the direct EOM solver.\
@@ -500,6 +506,7 @@ Cell[BoxData[
    RowBox[{"QKOrbits`QKAllowedPNOrders", "[", "]"}]}], ";", 
   RowBox[{"pnOrder", "=", "3"}], ";", 
   RowBox[{"includeRR25", "=", "False"}], ";", 
+  RowBox[{"includeRR35", "=", "False"}], ";",
   RowBox[{"parabolicVelocitySign", "=", "1"}], ";", 
   RowBox[{"wp", "=", "MachinePrecision"}], ";", 
   RowBox[{"accGoal", "=", "Automatic"}], ";", 

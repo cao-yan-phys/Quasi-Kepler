@@ -16,7 +16,8 @@ Options[DirectEOMLoad] = {"RootDirectory" -> Automatic};
 Options[DirectEOMOrbit] = {WorkingPrecision -> MachinePrecision,
    AccuracyGoal -> Automatic, PrecisionGoal -> Automatic, "PNOrder" -> 3,
    MaxStepSize -> Automatic, Method -> Automatic,
-   "Include2p5PNRadiationReaction" -> False};
+   "Include2p5PNRadiationReaction" -> False,
+   "Include3p5PNRadiationReaction" -> False};
 
 DirectEOMAllowedPNOrders[] := {0, 1, 1.5, 2, 2.5, 3};
 
@@ -86,6 +87,27 @@ radiationReaction25Polar[] := Module[{vtLocal, v2Local, a25, b25,
   <|"rddot" -> aN25, "phiddot" -> s*aL25|>
   ];
 
+radiationReaction35Polar[] := Module[
+  {vtLocal, v2Local, a35, b35, aN35, aL35},
+  vtLocal = p/s;
+  v2Local = rd^2 + vtLocal^2;
+  a35 = eps^7*nu*s*rd*(
+     s^2*(3956/35 + 184*nu/5) +
+      s*v2Local*(692/35 - 724*nu/15) +
+      v2Local^2*(366/35 + 12*nu) +
+      s*rd^2*(294/5 + 376*nu/5) -
+      v2Local*rd^2*(114 + 12*nu) + 112*rd^4);
+  b35 = eps^7*nu*s*(
+     s^2*(-1060/21 - 104*nu/5) +
+      s*v2Local*(164/21 + 148*nu/5) +
+      v2Local^2*(-626/35 - 12*nu/5) +
+      s*rd^2*(-82/3 - 848*nu/15) +
+      v2Local*rd^2*(678/5 + 12*nu/5) - 120*rd^4);
+  aN35 = -s^2*(a35 + b35*rd);
+  aL35 = -s^2*b35*vtLocal;
+  <|"rddot" -> aN35, "phiddot" -> s*aL35|>
+  ];
+
 DirectEOMLoad[OptionsPattern[]] := Module[{root, file},
   root = Replace[OptionValue["RootDirectory"],
     Automatic -> $DirectEOMOrbitsRoot];
@@ -106,8 +128,8 @@ DirectEOMLoad::nofile = "Direct EOM file not found: `1`.";
 
 DirectEOMOrbit[eom_Association, primitiveParams_Association,
   initialData_Association, times_List, OptionsPattern[]] := Module[
-  {wp, acc, prec, pn, step, method, includeRR25, rr25, tStart, tauEnd,
-   rddotExpr, phiddotExpr, r0, phi0, rd0, p0, sol, states,
+  {wp, acc, prec, pn, step, method, includeRR25, includeRR35, rr25,
+   rr35, tStart, tauEnd, rddotExpr, phiddotExpr, r0, phi0, rd0, p0, sol, states,
    ndsolveOpts, required},
 
   wp = OptionValue[WorkingPrecision];
@@ -118,6 +140,7 @@ DirectEOMOrbit[eom_Association, primitiveParams_Association,
   step = OptionValue[MaxStepSize];
   method = OptionValue[Method];
   includeRR25 = TrueQ[OptionValue["Include2p5PNRadiationReaction"]];
+  includeRR35 = TrueQ[OptionValue["Include3p5PNRadiationReaction"]];
   required = {"r", "phi", "rdot", "phidot"};
   If[Sort[Keys[initialData]] =!= Sort[required],
    Message[DirectEOMOrbit::badic, initialData];
@@ -136,15 +159,20 @@ DirectEOMOrbit[eom_Association, primitiveParams_Association,
    Return[$Failed];
    ];
 
-  rr25 = If[includeRR25 && pnMaxPower[pn] >= 5,
+  rr25 = If[includeRR25,
     radiationReaction25Polar[],
     <|"rddot" -> 0, "phiddot" -> 0|>
     ];
+  rr35 = If[includeRR35,
+    radiationReaction35Polar[],
+    <|"rddot" -> 0, "phiddot" -> 0|>
+    ];
 
-  rddotExpr = N[truncatePN[eom["polarODE", "rddot"] + rr25["rddot"], pn] /.
+  rddotExpr = N[(truncatePN[eom["polarODE", "rddot"], pn] +
+       rr25["rddot"] + rr35["rddot"]) /.
      directRules[primitiveParams], wp];
-  phiddotExpr = N[truncatePN[eom["polarODE", "phiddot"] + rr25["phiddot"],
-      pn] /.
+  phiddotExpr = N[(truncatePN[eom["polarODE", "phiddot"], pn] +
+       rr25["phiddot"] + rr35["phiddot"]) /.
      directRules[primitiveParams], wp];
 
   ndsolveOpts = Sequence[

@@ -1,4 +1,4 @@
-# QK Orbits
+# Quasi-Kepler
 
 Tools for conservative PN quasi-Keplerian (QK) orbits and direct polar-EOM evolution for aligned-spin compact binaries, with additional 3D numerical dynamics, osculating-element analysis, and center-of-mass reconstruction tools.
 
@@ -40,15 +40,15 @@ All three models use the same aligned-spin conservative content through 3PN: non
 
 - `Numerical3DOrbit` in `src/Numerical3DOrbits.wl` provides one entry point for the `"SpinningBinary3PN"` and `"WillEMRI"` numerical models and returns both Cartesian and spherical orbit data.
 
-- `SpinningBinary3PNOrbit` in `src/SpinningBinary3PNOrbits.wl` evolves a generic-spin comparable-mass binary in 3D with nonspinning terms through 3PN, spin-orbit terms through 2.5PN, spin-spin terms through 3PN, and leading spin-orbit precession.
+- `SpinningBinary3PNOrbit` in `src/SpinningBinary3PNOrbits.wl` evolves a generic-spin binary in 3D with nonspinning terms through 3PN, spin-orbit terms through 2.5PN, spin-spin terms through 3PN, and leading spin-orbit precession of both spins.
 
-- `EMRI3DOrbit` in `src/EMRI3DOrbits.wl` evolves inclined test-body orbits with the Will--Maitra harmonic-coordinate Kerr EOM: conservative dynamics through 3PN and optional radiation reaction through 4.5PN.
+- `EMRI3DOrbit` in `src/EMRI3DOrbits.wl` evolves inclined orbits of a nonspinning test body around a spinning massive black hole with the Will--Maitra harmonic-coordinate Kerr EOM: conservative dynamics through 3PN and optional radiation reaction through 4.5PN.
 
-- `Osculating3DStateFromElements` and `Osculating3DElementsFromOrbit` in `src/OsculatingElements3D.wl` convert between 3D states and the six Keplerian elliptical, parabolic, or hyperbolic osculating elements $(a,e,i,\phi_0,\varphi_0,t_0)$ defined in [arXiv:2411.03095](https://arxiv.org/abs/2411.03095), together with the instantaneous true anomaly $\varphi$.
+- `Osculating3DStateFromElements` and `Osculating3DElementsFromOrbit` in `src/OsculatingElements3D.wl` convert between 3D states and a common Keplerian osculating-conic parameterization: elliptical for $0\le e<1$, parabolic for $e=1$, and hyperbolic for $e>1$.  The interface uses the six elements $(a,e,i,\phi_0,\varphi_0,t_0)$ defined in [arXiv:2411.03095](https://arxiv.org/abs/2411.03095), together with the instantaneous true anomaly $\varphi$; on the parabolic branch, the semilatus rectum $p$ replaces the degenerate $a$.
 
 - `Scattering2024Compare` in `src/Scattering2024.wl` compares numerical hyperbolic encounters with the first-order analytic osculating-element changes in [arXiv:2411.03095](https://arxiv.org/abs/2411.03095) for 1PN, 1.5PN SO, quadrupole, and 2.5PN effects.
 
-- `SpinOrbitScattering1p5PN` in `src/SpinOrbitScattering1p5PN.wl` implements a closed, exact-in-eccentricity 1.5PN spin-orbit scattering result for arbitrary mass ratio and two arbitrary incoming spin directions, returning the changes of the angular-momentum and eccentricity vectors, the outgoing velocity direction, the axial velocity-scattering vector, the complete orbital-frame rotation, and the leading rotations of both spins.  Let $X_A=m_A/M$, $\delta=X_1-X_2$, $\vec S=\vec S_1+\vec S_2$, and $\vec\Sigma=\vec S_2/X_2-\vec S_1/X_1$.  For the Newtonian hyperbola, use the periastron basis $(\hat p,\hat q,\hat L)$ and define $p=a(e^2-1)$, $h=\sqrt{Mp}$, $\rho=\sqrt{e^2-1}$, $F=\arccos(-1/e)$, $S_\alpha=\vec S\cdot\hat\alpha$, $\Sigma_\alpha=\vec\Sigma\cdot\hat\alpha$ for $\alpha\in\{p,q,L\}$, $A=F+\rho/e^2$, $B=2\rho^3/(3e^3)$, $C=A+eB$, $D=F-\rho/e^2+2\rho-2\rho^3/(3e^2)$, and $Q=2eF+2e\rho-2\rho^3/(3e)$.  The closed vector changes are $\Delta\vec h=(\epsilon^3/p)\{[2eB S_q+C(7S_q+3\delta\Sigma_q)]\hat p+[2eB S_p-D(7S_p+3\delta\Sigma_p)]\hat q\}$ and $\Delta\vec e=(\epsilon^3/(hp))\{[-4eA S_L-2e^2B S_L-Q(5S_L+3\delta\Sigma_L)]\hat q-[2e^2B S_q+eC(7S_q+3\delta\Sigma_q)]\hat L\}$.  Here $\epsilon$ is the PN bookkeeping parameter and is set to one physically; at this order $\Delta a=\Delta e=0$, so the scalar eccentricity is unchanged although the direction of $\vec e$ can change.  The outgoing correction follows from $\delta\hat L=\Delta\vec h/h$, $\delta\hat p=\Delta\vec e/e$, $\delta\hat q=\delta\hat L\times\hat p+\hat L\times\delta\hat p$, $\hat k_{\rm in}=(\hat p+\rho\hat q)/e$, $\hat k_{\rm out}^{\rm N}=(-\hat p+\rho\hat q)/e$, and $\delta\hat k_{\rm out}=-\delta\hat p/e+(\rho/e)\delta\hat q$.  Finally, `ScatteringVector` is $\vec\chi=\mathrm{atan2}(|\hat k_{\rm in}\times\hat k_{\rm out}|,\hat k_{\rm in}\cdot\hat k_{\rm out})(\hat k_{\rm in}\times\hat k_{\rm out})/|\hat k_{\rm in}\times\hat k_{\rm out}|$; its magnitude is the three-dimensional velocity deflection angle.  The two spins rotate about the incoming $\hat L$ by $\Theta_1=2\epsilon^2(F+\rho)[2+3X_2/(2X_1)]/p$ and $\Theta_2=2\epsilon^2(F+\rho)[2+3X_1/(2X_2)]/p$; the interface returns these angles, their axial rotation vectors, and the linearly truncated final spins.  The results have also been tested against direct numerical integration of the coupled orbital-spin EOM.
+- `SpinOrbitScattering1p5PN` in `src/SpinOrbitScattering1p5PN.wl` implements a closed, exact-in-eccentricity 1.5PN spin-orbit scattering result for arbitrary mass ratio and two arbitrary incoming spin directions, returning the changes of the angular-momentum and eccentricity vectors, the outgoing velocity direction, the axial velocity-scattering vector, the complete orbital-frame rotation, and the leading rotations of both spins.  Let $X_A=m_A/M$, $\delta=X_1-X_2$, $\vec S=\vec S_1+\vec S_2$, and $\vec\Sigma=\vec S_2/X_2-\vec S_1/X_1$.  For the initial osculating Newtonian hyperbola, use the periastron basis $(\hat p,\hat q,\hat L)$ and define $p=a(e^2-1)$, $h=\sqrt{Mp}$, $\rho=\sqrt{e^2-1}$, $F=\arccos(-1/e)$, $S_\alpha=\vec S\cdot\hat\alpha$, $\Sigma_\alpha=\vec\Sigma\cdot\hat\alpha$ for $\alpha\in\{p,q,L\}$, $A=F+\rho/e^2$, $B=2\rho^3/(3e^3)$, $C=A+eB$, $D=F-\rho/e^2+2\rho-2\rho^3/(3e^2)$, and $Q=2eF+2e\rho-2\rho^3/(3e)$.  The closed vector changes are $\Delta\vec h=(\epsilon^3/p)\{[2eB S_q+C(7S_q+3\delta\Sigma_q)]\hat p+[2eB S_p-D(7S_p+3\delta\Sigma_p)]\hat q\}$ and $\Delta\vec e=(\epsilon^3/(hp))\{[-4eA S_L-2e^2B S_L-Q(5S_L+3\delta\Sigma_L)]\hat q-[2e^2B S_q+eC(7S_q+3\delta\Sigma_q)]\hat L\}$.  Here $\epsilon$ is the PN bookkeeping parameter and is set to one physically; at this order $\Delta a=\Delta e=0$, so the scalar eccentricity is unchanged although the direction of $\vec e$ can change.  The outgoing correction follows from $\delta\hat L=\Delta\vec h/h$, $\delta\hat p=\Delta\vec e/e$, $\delta\hat q=\delta\hat L\times\hat p+\hat L\times\delta\hat p$, $\hat k_{\rm in}=(\hat p+\rho\hat q)/e$, $\hat k_{\rm out}^{\rm N}=(-\hat p+\rho\hat q)/e$, and $\delta\hat k_{\rm out}=-\delta\hat p/e+(\rho/e)\delta\hat q$.  Finally, `ScatteringVector` is $\vec\chi=\mathrm{atan2}(|\hat k_{\rm in}\times\hat k_{\rm out}|,\hat k_{\rm in}\cdot\hat k_{\rm out})(\hat k_{\rm in}\times\hat k_{\rm out})/|\hat k_{\rm in}\times\hat k_{\rm out}|$; its magnitude is the three-dimensional velocity deflection angle.  The two spins rotate about the incoming $\hat L$ by $\Theta_1=2\epsilon^2(F+\rho)[2+3X_2/(2X_1)]/p$ and $\Theta_2=2\epsilon^2(F+\rho)[2+3X_1/(2X_2)]/p$; the interface returns these angles, their axial rotation vectors, and the linearly truncated final spins.  The results have also been tested against direct numerical integration of the coupled orbital-spin EOM.
 
 ## Quick Start
 
@@ -369,13 +369,16 @@ s=\frac{1}{r},\qquad v_t=r\dot\phi=\frac{\dot\phi}{s},\qquad
 v^2=\dot r^2+v_t^2 .
 $$
 
-The direct integrator can optionally add the leading 2.5PN radiation-reaction acceleration:
+The direct integrator can optionally add the nonspinning harmonic-coordinate radiation-reaction acceleration at 2.5PN and 3.5PN:
 
 ```wl
-"Include2p5PNRadiationReaction" -> True
+"Include2p5PNRadiationReaction" -> True,
+"Include3p5PNRadiationReaction" -> True
 ```
 
-This option is off by default.  With it enabled, the direct EOM is dissipative and is not expected to coincide with the conservative QK trajectory.
+Both switches are off by default and are independent of the conservative `PNOrder` setting; a physical radiation-reaction truncation through 3.5PN normally enables both.
+
+With either switch enabled, the direct EOM is dissipative and is not expected to coincide with the conservative QK trajectory.
 
 For speed, `DirectEOMOrbit` defaults to machine precision, automatic accuracy goals, automatic method choice, and automatic step size.  The earlier high-precision validation settings
 
